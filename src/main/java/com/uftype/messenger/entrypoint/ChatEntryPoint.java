@@ -1,5 +1,7 @@
-package com.uftypemessenger;
+package com.uftype.messenger.entrypoint;
 
+import com.uftype.messenger.client.ChatClient;
+import com.uftype.messenger.server.ChatServer;
 import java.io.IOException;
 
 public class ChatEntryPoint {

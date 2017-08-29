@@ -1,4 +1,4 @@
-package com.uftypemessenger;
+package com.uftype.messenger.server;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -17,7 +17,7 @@ public class ChatServer {
 
     private HashMap<String, PrintWriter> clients; // Mapping of client names to PrintWriters
 
-    ChatServer(int port) throws IOException {
+    public ChatServer(int port) throws IOException {
         connect(port);
         clients = new HashMap<String, PrintWriter>();
     }

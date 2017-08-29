@@ -1,4 +1,4 @@
-package com.uftypemessenger;
+package com.uftype.messenger.client;
 
 import java.io.*;
 import java.net.Socket;
@@ -13,7 +13,7 @@ public class ChatClient {
 
     private boolean isReceiving; // True if currently receiving messages
 
-    ChatClient(String host, int port) throws IOException {
+    public ChatClient(String host, int port) throws IOException {
         connect(host, port);
     }
 
