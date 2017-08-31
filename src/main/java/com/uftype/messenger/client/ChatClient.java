@@ -35,16 +35,12 @@ public class ChatClient {
             // Can now speak with server (chat room)
             System.out.println("You've connected to the chat room. Chat away!");
 
-            String receiveMsg, sendMsg;
-            while(isReceiving) {
-                sendMsg = screenReader.readLine();
-                writer.println(sendMsg);
-                writer.flush();
+            // Create two threads, one to listen for messages, one for listening to typing on screen
+            Thread sendMessageThread = new Thread(new SendRunnable());
+            Thread receiveMessageThread = new Thread(new ReceiveRunnable());
 
-                if ((receiveMsg = receiveReader.readLine()) != null) {
-                    System.out.println(receiveMsg);
-                }
-            }
+            sendMessageThread.start();
+            receiveMessageThread.start();
         }
         catch (IOException e) {
             System.out.println("Uh-oh! Something happened: " + e);
@@ -54,4 +50,37 @@ public class ChatClient {
     private void disConnect() {
         isReceiving = false;
     }
+
+    class SendRunnable implements Runnable {
+        public void run() {
+            try {
+                String sendMsg;
+                while(isReceiving) {
+                    // Create two threads, one to listen for messages, one for listening to typing on screen
+                    sendMsg = screenReader.readLine();
+                    writer.println(sendMsg);
+                    writer.flush();
+                }
+            }
+            catch (IOException e) {}
+        }
+    }
+
+    class ReceiveRunnable implements Runnable {
+        public void run() {
+            try {
+                String receiveMsg;
+                while(isReceiving) {
+                    // Create two threads, one to listen for messages, one for listening to typing on screen
+                    if ((receiveMsg = receiveReader.readLine()) != null) {
+                        System.out.println(receiveMsg);
+                    }
+                }
+            }
+            catch (IOException e) {}
+        }
+    }
 }
+
+
+
