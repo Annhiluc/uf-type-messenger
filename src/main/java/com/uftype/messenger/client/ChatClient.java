@@ -1,19 +1,20 @@
 package com.uftype.messenger.client;
 
+import com.uftype.messenger.common.ChatConnection;
+
 import java.io.*;
 import java.net.Socket;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /* Represents the chat client. */
 public class ChatClient {
-    private Socket socket; // Socket used for communication with the server
-    private BufferedReader screenReader, receiveReader; // Reader for reading the text on the screen, other for reading the text from the server
-    private PrintWriter writer; // Writer to the server
-    private OutputStream outputStream; // Output stream of the socket for writing to server
-    private InputStream inputStream; // Input stream of the socket for reading from server
-
-    private boolean isReceiving; // True if currently receiving messages
+    ChatConnection connection;
+    private final static Logger LOGGER = Logger.getLogger(ChatClient.class.getName()); // Logger to provide information to server
 
     public ChatClient(String host, int port) throws IOException {
+        LOGGER.log(Level.INFO, "Initializing UF TYPE chat client on host and port " + host + " " + port);
+        connection = new ChatConnection();
         connect(host, port);
     }
 
@@ -22,63 +23,17 @@ public class ChatClient {
      */
     private void connect(String host, int port) throws IOException {
         try {
-            socket = new Socket(host, port);
-            screenReader = new BufferedReader(new InputStreamReader(System.in));
-            outputStream = socket.getOutputStream();
-            writer = new PrintWriter(outputStream, true);
-
-            inputStream = socket.getInputStream();
-            receiveReader = new BufferedReader(new InputStreamReader(inputStream));
-
-            isReceiving = true;
+            connection.connect(host, port);
 
             // Can now speak with server (chat room)
-            System.out.println("You've connected to the chat room. Chat away!");
-
-            // Create two threads, one to listen for messages, one for listening to typing on screen
-            Thread sendMessageThread = new Thread(new SendRunnable());
-            Thread receiveMessageThread = new Thread(new ReceiveRunnable());
-
-            sendMessageThread.start();
-            receiveMessageThread.start();
-        }
-        catch (IOException e) {
-            System.out.println("Uh-oh! Something happened: " + e);
+            LOGGER.log(Level.INFO, "You've connected to the chat room. Chat away!");
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "UF TYPE client failure: " + e);
         }
     }
 
     private void disConnect() {
-        isReceiving = false;
-    }
-
-    class SendRunnable implements Runnable {
-        public void run() {
-            try {
-                String sendMsg;
-                while(isReceiving) {
-                    // Create two threads, one to listen for messages, one for listening to typing on screen
-                    sendMsg = screenReader.readLine();
-                    writer.println(sendMsg);
-                    writer.flush();
-                }
-            }
-            catch (IOException e) {}
-        }
-    }
-
-    class ReceiveRunnable implements Runnable {
-        public void run() {
-            try {
-                String receiveMsg;
-                while(isReceiving) {
-                    // Create two threads, one to listen for messages, one for listening to typing on screen
-                    if ((receiveMsg = receiveReader.readLine()) != null) {
-                        System.out.println(receiveMsg);
-                    }
-                }
-            }
-            catch (IOException e) {}
-        }
+        connection.disconnect();
     }
 }
 

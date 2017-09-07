@@ -20,4 +20,8 @@ public class ChatAuthentication {
     public void authenticate() {
 
     }
+
+    public void encrypt() {
+
+    }
 }
