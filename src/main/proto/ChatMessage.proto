@@ -1,0 +1,23 @@
+syntax = "proto2";
+
+package com.uftype.messenger.proto;
+
+message Message {
+    optional int32 id = 1;
+    required string text = 2;
+
+    enum ChatType {
+        TEXT = 1;
+        LOGIN = 2;
+        LOGOUT = 3;
+        NEWUSER = 4;
+        FILE = 5;
+        CODE = 6;
+        PING = 7;
+        CLOSE = 8;
+    }
+}
+
+message MessageQueue {
+    repeated Message messages = 1;
+}
