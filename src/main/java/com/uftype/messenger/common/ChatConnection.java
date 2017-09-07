@@ -7,6 +7,7 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.HashMap;
 
 public class ChatConnection {
     public static Socket socket; // Socket used for communication
@@ -14,17 +15,25 @@ public class ChatConnection {
     public static OutputStream outputStream; // Output stream of the socket for writing to connection
     public static InputStream inputStream; // Input stream of the socket for reading from connection
 
-    public static boolean isReceiving;
+    public static boolean isReceiving; // True if the server/client is up
+
+    public static Thread sendMessageThread; // Thread for sending messages
+    public static Thread receiveMessageThread; // Thread for receiving messages
+
+    public static HashMap<String, Thread> sendThreads;
+    public static HashMap<String, Thread> receiveThreads;
 
     public ChatConnection() {
         isReceiving = true;
+        sendThreads = new HashMap<String, Thread>();
+        receiveThreads = new HashMap<String, Thread>();
     }
 
     public static void connect(ServerSocket server) {
         try {
             socket = server.accept();
             initialize();
-            startListening();
+            startListening(server.getInetAddress().toString());
         } catch (IOException e) {
             System.out.println("Error while connecting to server socket: " + e);
         }
@@ -34,7 +43,7 @@ public class ChatConnection {
         try {
             socket = new Socket(host, port);
             initialize();
-            startListening();
+            startListening(host);
         } catch (IOException e) {
             System.out.println("Error while connecting to socket: " + e);
         }
@@ -96,10 +105,13 @@ public class ChatConnection {
         }
     }
 
-    private static void startListening() {
+    private static void startListening(String host) {
         // Create two threads, one to listen for messages, one for listening to typing on screen
-        Thread sendMessageThread = new Thread(new SendRunnable());
-        Thread receiveMessageThread = new Thread(new ReceiveRunnable());
+        sendMessageThread = new Thread(new SendRunnable());
+        receiveMessageThread = new Thread(new ReceiveRunnable());
+
+        sendThreads.put(host, sendMessageThread);
+        receiveThreads.put(host, receiveMessageThread);
 
         sendMessageThread.start();
         receiveMessageThread.start();

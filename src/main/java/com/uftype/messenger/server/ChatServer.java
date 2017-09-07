@@ -17,9 +17,12 @@ public class ChatServer {
 
     private final static Logger LOGGER = Logger.getLogger(ChatServer.class.getName()); // Logger to provide information to server
 
+    private HashMap<String, ChatConnection> connections;
+
     public ChatServer(int port) throws IOException {
         LOGGER.log(Level.INFO, "Initializing UF TYPE chat server on port " + port);
         connection = new ChatConnection();
+        connections = new HashMap<String, ChatConnection>();
         LOGGER.log(Level.INFO, "The UF TYPE chat server is initialized. It is ready for chatting!");
         connect(port);
     }
@@ -33,6 +36,8 @@ public class ChatServer {
 
             while (connection.isReceiving) {
                 connection.connect(serverSocket);
+
+                connections.put(connection.socket.getInetAddress().toString(), connection);
 
                 // People can now post in the server (chat room)
                 LOGGER.log(Level.INFO, "Someone has entered the chat room: " + connection.socket.getRemoteSocketAddress());
