@@ -1,6 +1,6 @@
 package com.uftype.messenger.auth;
 
-public class ChatAuthentication {
+public class Authentication {
     public void login() {
 
     }

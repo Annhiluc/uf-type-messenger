@@ -1,6 +1,7 @@
 package com.uftype.messenger.common;
 
 import com.google.protobuf.InvalidProtocolBufferException;
+import com.sun.org.apache.regexp.internal.RE;
 import com.uftype.messenger.proto.ChatMessage;
 
 import java.io.*;
@@ -9,58 +10,53 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.util.HashMap;
 
-public class ChatConnection {
-    public static Socket socket; // Socket used for communication
-    public static BufferedReader screenReader, receiveReader; // Reader for reading the text on the screen, other for reading the text from connection
-    public static OutputStream outputStream; // Output stream of the socket for writing to connection
-    public static InputStream inputStream; // Input stream of the socket for reading from connection
-
-    public static boolean isReceiving; // True if the server/client is up
-
-    public static Thread sendMessageThread; // Thread for sending messages
-    public static Thread receiveMessageThread; // Thread for receiving messages
-
+public class Connection {
     public static HashMap<String, Thread> sendThreads;
     public static HashMap<String, Thread> receiveThreads;
 
-    public ChatConnection() {
-        isReceiving = true;
+    public Connection() {
         sendThreads = new HashMap<String, Thread>();
         receiveThreads = new HashMap<String, Thread>();
     }
 
-    public static void connect(ServerSocket server) {
-        try {
-            socket = server.accept();
-            initialize();
-            startListening(server.getInetAddress().toString());
-        } catch (IOException e) {
-            System.out.println("Error while connecting to server socket: " + e);
-        }
+    public static void connect(Socket sock) {
+        startListening(sock);
     }
 
     public static void connect (String host, int port) {
-        try {
-            socket = new Socket(host, port);
-            initialize();
-            startListening(host);
-        } catch (IOException e) {
-            System.out.println("Error while connecting to socket: " + e);
+        startListening(host, port);
+    }
+
+    private static class SendReceiveThread extends Thread {
+        public static Socket socket; // Socket used for communication
+        public static BufferedReader screenReader, receiveReader; // Reader for reading the text on the screen, other for reading the text from connection
+        public static OutputStream outputStream; // Output stream of the socket for writing to connection
+        public static InputStream inputStream; // Input stream of the socket for reading from connection
+
+        public static boolean isReceiving; // True if the server/client is up
+
+        public SendReceiveThread(Socket socket) {
+            this.socket = socket;
+            isReceiving = true;
+        }
+
+        private static void initialize() {
+            try {
+                screenReader = new BufferedReader(new InputStreamReader(System.in));
+                outputStream = socket.getOutputStream();
+                inputStream = socket.getInputStream();
+                receiveReader = new BufferedReader(new InputStreamReader(inputStream));
+            } catch (IOException e) {
+                System.out.println("Error while initializing input and output streams: " + e);
+            }
         }
     }
 
-    private static void initialize() {
-        try {
-            screenReader = new BufferedReader(new InputStreamReader(System.in));
-            outputStream = socket.getOutputStream();
-            inputStream = socket.getInputStream();
-            receiveReader = new BufferedReader(new InputStreamReader(inputStream));
-        } catch (IOException e) {
-            System.out.println("Error while initializing input and output streams: " + e);
+    private static class SendThread extends SendReceiveThread {
+        public SendThread(Socket socket) {
+            super(socket);
         }
-    }
 
-    private static class SendRunnable implements Runnable {
         public void run() {
             try {
                 String sendMsg;
@@ -85,7 +81,11 @@ public class ChatConnection {
         }
     }
 
-    private static class ReceiveRunnable implements Runnable {
+    private static class ReceiveThread extends SendReceiveThread {
+        public ReceiveThread(Socket socket) {
+            super(socket);
+        }
+
         public void run() {
             try {
                 String receiveMsg;
@@ -105,19 +105,28 @@ public class ChatConnection {
         }
     }
 
-    private static void startListening(String host) {
-        // Create two threads, one to listen for messages, one for listening to typing on screen
-        sendMessageThread = new Thread(new SendRunnable());
-        receiveMessageThread = new Thread(new ReceiveRunnable());
+    private static void startListening(String host, int port) {
+        try {
+            Socket socket = new Socket(host, port);
+            startListening(socket);
+        } catch (IOException e) {
+            System.out.println("Error while connecting to the messenger.");
+        }
+    }
 
-        sendThreads.put(host, sendMessageThread);
-        receiveThreads.put(host, receiveMessageThread);
+    private static void startListening(Socket socket) {
+        // Create two threads, one to listen for messages, one for listening to typing on screen
+        SendReceiveThread sendMessageThread = new SendThread(socket);
+        SendReceiveThread receiveMessageThread = new ReceiveThread(socket);
+
+        sendThreads.put(socket.getInetAddress().toString(), sendMessageThread);
+        receiveThreads.put(socket.getInetAddress().toString(), receiveMessageThread);
 
         sendMessageThread.start();
         receiveMessageThread.start();
     }
 
     public static void disconnect() {
-        isReceiving = false;
+        // Disconnect every client in the hashmap
     }
 }

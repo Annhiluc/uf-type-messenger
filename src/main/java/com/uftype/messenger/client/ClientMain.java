@@ -3,7 +3,7 @@ package com.uftype.messenger.client;
 import java.io.IOException;
 import java.util.Scanner;
 
-public class ChatClientMain {
+public class ClientMain {
     public static void main(String[] args) throws IOException {
         try {
             Scanner in = new Scanner(System.in);
@@ -13,7 +13,7 @@ public class ChatClientMain {
             System.out.println("Please enter the port you want to communicate on: ");
             int port = in.nextInt();
 
-            ChatClient client = new ChatClient(host, port);
+            Client client = new Client(host, port);
         } catch (IOException e) {
         }
     }

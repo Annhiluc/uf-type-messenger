@@ -1,6 +1,6 @@
 package com.uftype.messenger.auth;
 
-public class ChatDatabase {
+public class Database {
     public void connect() {
 
     }
