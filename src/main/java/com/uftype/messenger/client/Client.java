@@ -3,6 +3,7 @@ package com.uftype.messenger.client;
 import com.uftype.messenger.common.Connection;
 
 import java.io.*;
+import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -13,7 +14,6 @@ public class Client {
 
     public Client(String host, int port) throws IOException {
         LOGGER.log(Level.INFO, "Initializing UF TYPE chat client on host and port " + host + " " + port);
-        connection = new Connection();
         connect(host, port);
     }
 
@@ -22,7 +22,8 @@ public class Client {
      */
     private void connect(String host, int port) throws IOException {
         try {
-            connection.connect(host, port);
+            connection = new Connection(new Socket(host, port));
+            connection.start();
 
             // Can now speak with server (chat room)
             LOGGER.log(Level.INFO, "You've connected to the chat room. Chat away!");

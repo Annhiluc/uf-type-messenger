@@ -1,26 +1,27 @@
 package com.uftype.messenger.server;
 
 import com.uftype.messenger.common.Connection;
+import com.uftype.messenger.proto.ChatMessage;
 
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Server {
     private ServerSocket serverSocket; // Socket for the server
-    private boolean isUp;
+    private boolean isUp = true;
+    private HashMap<String, Connection> connections = new HashMap<String, Connection>();
+    private ArrayList<ChatMessage> messageQueue = new ArrayList<ChatMessage>();
+
 
     private final static Logger LOGGER = Logger.getLogger(Server.class.getName()); // Logger to provide information to server
 
-    private HashMap<String, Connection> connections;
 
     public Server(int port) throws IOException {
-        LOGGER.log(Level.INFO, "Initializing UF TYPE chat server on port " + port);
-        connections = new HashMap<String, Connection>();
-        isUp = true;
         LOGGER.log(Level.INFO, "The UF TYPE chat server is initialized. It is ready for chatting!");
         connect(port);
     }
@@ -34,8 +35,13 @@ public class Server {
 
             while (isUp) {
                 Socket socket = serverSocket.accept();
-                ConnectClient newConnection = new ConnectClient(socket);
-                newConnection.start();
+                Connection clientConnection = new Connection(socket);
+                clientConnection.start();
+
+                connections.put(clientConnection.socket.getInetAddress().toString(), clientConnection);
+
+                // People can now post in the server (chat room)
+                LOGGER.log(Level.INFO, "Someone has entered the chat room: " + socket.getInetAddress().toString());
             }
         } catch (IOException e) {
             LOGGER.log(Level.WARNING, "UF TYPE server failure: " + e);
@@ -45,23 +51,5 @@ public class Server {
     private void disconnect() {
         isUp = false;
         // Need to disconnect from each connection in the hashmap
-    }
-
-    class ConnectClient extends Thread {
-        Socket socket;
-
-        public ConnectClient(Socket socket) {
-            this.socket = socket;
-        }
-
-        public void run() {
-            Connection connection = new Connection();
-            connection.connect(this.socket);
-
-            connections.put(this.socket.getInetAddress().toString(), connection);
-
-            // People can now post in the server (chat room)
-            LOGGER.log(Level.INFO, "Someone has entered the chat room: " + this.socket.getInetAddress().toString());
-        }
     }
 }
