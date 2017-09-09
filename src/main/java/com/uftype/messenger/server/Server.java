@@ -21,7 +21,7 @@ public class Server {
      */
     private void connect(int port) throws IOException {
         try {
-            Dispatcher serverDispatcher = new ServerDispatcher(new InetSocketAddress(InetAddress.getLocalHost(), port));
+            Dispatcher serverDispatcher = new ServerDispatcher(new InetSocketAddress("127.0.0.1", port));
             serverDispatcher.run();
         } catch (IOException e) {
             LOGGER.log(Level.WARNING, "UF TYPE server failure: " + e);

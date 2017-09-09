@@ -14,12 +14,12 @@ public class ServerDispatcher extends Dispatcher {
 
     public ServerDispatcher(InetSocketAddress address) throws IOException {
         super(address);
-        LOGGER.log(Level.INFO, "Initializing UF TYPE chat server on host and port " + address.getHostName() + ":" + address.getPort());
+        LOGGER.log(Level.INFO, "Initializing UF TYPE chat server on host and port " + address.getAddress() + ":" + address.getPort());
     }
 
     @Override
     protected SelectableChannel getChannel(InetSocketAddress address) throws IOException {
-        SocketChannel socketChannel = SocketChannel.open();
+        ServerSocketChannel socketChannel = ServerSocketChannel.open();
         socketChannel.configureBlocking(false);
         socketChannel.socket().bind(address);
         return socketChannel;
@@ -43,7 +43,7 @@ public class ServerDispatcher extends Dispatcher {
     @Override
     protected void handleData(String message) throws IOException{
         for (SelectionKey key : selector.keys()) {
-            if (key.channel() instanceof SocketChannel && key.equals(selector)) {
+            if (key.channel() instanceof SocketChannel && !key.equals(selector)) {
                 key.attach(ByteBuffer.wrap(message.getBytes()));
                 doWrite(key);
             }

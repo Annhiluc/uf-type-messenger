@@ -52,10 +52,11 @@ public class ClientDispatcher extends Dispatcher {
     }
 
     @Override
-    protected void handleData(String message) {
+    protected void handleData(String message) throws IOException{
         messageQueue.add(message);
         SelectionKey handle = channel.keyFor(selector);
-
-        handle.interestOps(OP_WRITE);
+        //handle.attach(message.getBytes());
+        //handle.interestOps(OP_WRITE);
+        doWrite(handle);
     }
 }

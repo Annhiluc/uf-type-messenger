@@ -2,13 +2,19 @@ package com.uftype.messenger.common;
 
 import com.uftype.messenger.server.Server;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.*;
 import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static java.lang.System.arraycopy;
+import static java.nio.channels.SelectionKey.OP_READ;
+import static java.nio.channels.SelectionKey.OP_WRITE;
 
 public abstract class Dispatcher implements Runnable {
     protected ByteBuffer buffer; // Buffer for handling messages
@@ -46,6 +52,9 @@ public abstract class Dispatcher implements Runnable {
 
     @Override
     public void run() {
+        ReceiveMessages receiveThread = new ReceiveMessages();
+        receiveThread.start();
+
         while (isUp) {
             try {
                 selector.select();
@@ -67,7 +76,7 @@ public abstract class Dispatcher implements Runnable {
                     }
                 }
             } catch (IOException e) {
-
+                LOGGER.log(Level.WARNING, "UF TYPE dispatcher failure: " + e);
             }
         }
 
@@ -75,7 +84,7 @@ public abstract class Dispatcher implements Runnable {
     }
 
     protected void doAccept (SelectionKey handle) throws IOException {
-        final ByteBuffer welcomeBuf = ByteBuffer.wrap("Welcome to UF TYPE Messenger Chat!\n".getBytes());
+        final ByteBuffer welcomeBuf = ByteBuffer.wrap("Welcome to UF TYPE Messenger Chat!".getBytes());
 
         try {
             ServerSocketChannel serverSocketChannel = (ServerSocketChannel) handle.channel();
@@ -84,10 +93,10 @@ public abstract class Dispatcher implements Runnable {
             if (socketChannel != null) {
                 String address = socketChannel.socket().getInetAddress() + ":" + socketChannel.socket().getPort();
                 socketChannel.configureBlocking(false);
-                socketChannel.register(selector, SelectionKey.OP_READ, address);
+                socketChannel.register(selector, OP_READ, address);
                 socketChannel.write(welcomeBuf);
                 welcomeBuf.rewind();
-                System.out.println("Someone entered the chat room!");
+                System.out.println("Someone entered the chat room: " + address);
             }
         } catch (IOException e) {
             LOGGER.log(Level.WARNING, "UF TYPE accept handler failure: " + e);
@@ -96,13 +105,12 @@ public abstract class Dispatcher implements Runnable {
 
     protected void doConnect (SelectionKey handle) throws IOException {
         try {
-            ServerSocketChannel serverSocketChannel = (ServerSocketChannel) handle.channel();
-            SocketChannel socketChannel = serverSocketChannel.accept();
+            SocketChannel socketChannel = (SocketChannel) handle.channel();
 
             if (socketChannel != null) {
                 socketChannel.finishConnect();
                 socketChannel.configureBlocking(false);
-                socketChannel.register(selector, SelectionKey.OP_WRITE);
+                socketChannel.register(selector, OP_WRITE);
             }
         } catch (IOException e) {
             LOGGER.log(Level.WARNING, "UF TYPE connect handler failure: " + e);
@@ -132,8 +140,22 @@ public abstract class Dispatcher implements Runnable {
             return;
         }
 
-        String msg = buffer.toString();
-        handleData(msg);
-        System.out.println(msg);
+        byte[] data = new byte[buffer.position()];
+        arraycopy(buffer.array(), 0, data, 0, buffer.position());
+        System.out.println(new String(data));
+    }
+
+    private class ReceiveMessages extends Thread {
+        public void run() {
+            BufferedReader in = new BufferedReader(new InputStreamReader((System.in)));
+            try {
+                while (isUp) {
+                    String msg = in.readLine();
+                    handleData(msg);
+                }
+            } catch (IOException e) {
+                LOGGER.log(Level.WARNING, "UF TYPE receiving messages failure: " + e);
+            }
+        }
     }
 }
