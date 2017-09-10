@@ -12,17 +12,17 @@ import java.util.logging.Logger;
 public class Client{
     private final static Logger LOGGER = Logger.getLogger(Client.class.getName()); // Logger to provide information to server
 
-    public Client(String host, int port) throws IOException {
+    public Client(String host, int port, String username) throws IOException {
         LOGGER.log(Level.INFO, "The UF TYPE chat client is initialized. It is ready for chatting!");
-        connect(host, port);
+        connect(host, port, username);
     }
 
     /* Accept communications from the port from multiple clients. Push all information onto the screen.
        Send information to clients.
      */
-    private void connect(String host, int port) throws IOException {
+    private void connect(String host, int port, String username) throws IOException {
         try {
-            Dispatcher clientDispatcher = new ClientDispatcher(new InetSocketAddress(host, port));
+            Dispatcher clientDispatcher = new ClientDispatcher(new InetSocketAddress(host, port), username);
             clientDispatcher.run();
         } catch (IOException e) {
             LOGGER.log(Level.WARNING, "UF TYPE client failure: " + e);
@@ -37,6 +37,9 @@ public class Client{
         try {
             Scanner in = new Scanner(System.in);
 
+            System.out.println("Please enter the username you'd like to use: ");
+            String username = in.nextLine();
+
             //System.out.println("Please enter the host you want to chat with: ");
             //String host = in.nextLine();
             //System.out.println("Please enter the port you want to communicate on: ");
@@ -44,7 +47,7 @@ public class Client{
 
             //Client client = new Client(host, port);
 
-            Client client = new Client("127.0.0.1", 3000);
+            Client client = new Client("127.0.0.1", 3000, username);
         } catch (IOException e) {
         }
     }

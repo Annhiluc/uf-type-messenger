@@ -1,5 +1,6 @@
 package com.uftype.messenger.common;
 
+import com.uftype.messenger.proto.ChatMessage;
 import com.uftype.messenger.server.Server;
 
 import java.io.BufferedReader;
@@ -22,15 +23,23 @@ public abstract class Dispatcher implements Runnable {
     protected SelectableChannel channel; // Current channel
     protected InetSocketAddress address; // IP address
     protected volatile boolean isUp; // True if running
+    protected String username;
+
+    ChatMessage.Message.Builder welcome = ChatMessage.Message.newBuilder();
 
     protected final Logger LOGGER = Logger.getLogger(Server.class.getName()); // Logger to provide information to server
 
-    public Dispatcher(InetSocketAddress address) throws IOException{
+    public Dispatcher(InetSocketAddress address, String username) throws IOException{
         this.address = address;
         this.buffer = ByteBuffer.allocate(16384);
         this.channel = getChannel(address);
         this.selector = getSelector();
         this.isUp = true;
+        this.username = username;
+
+        welcome.setText("Welcome to UF TYPE Messenger Chat!");
+        welcome.setUsername(this.username);
+        welcome.setSender(address.toString());
     }
 
     protected abstract SelectableChannel getChannel(InetSocketAddress address) throws IOException;
@@ -84,7 +93,6 @@ public abstract class Dispatcher implements Runnable {
     }
 
     protected void doAccept (SelectionKey handle) throws IOException {
-        final ByteBuffer welcomeBuf = ByteBuffer.wrap("Welcome to UF TYPE Messenger Chat!".getBytes());
 
         try {
             ServerSocketChannel serverSocketChannel = (ServerSocketChannel) handle.channel();
@@ -94,8 +102,8 @@ public abstract class Dispatcher implements Runnable {
                 String address = socketChannel.socket().getInetAddress() + ":" + socketChannel.socket().getPort();
                 socketChannel.configureBlocking(false);
                 socketChannel.register(selector, OP_READ, address);
-                socketChannel.write(welcomeBuf);
-                welcomeBuf.rewind();
+                welcome.setRecipient(socketChannel.socket().getLocalSocketAddress().toString()); // Set recipient of this message
+                socketChannel.write(ByteBuffer.wrap(welcome.build().toByteArray()));
                 System.out.println("Someone entered the chat room: " + address);
             }
         } catch (IOException e) {
@@ -142,20 +150,50 @@ public abstract class Dispatcher implements Runnable {
 
         byte[] data = new byte[buffer.position()];
         arraycopy(buffer.array(), 0, data, 0, buffer.position());
-        System.out.println(new String(data));
+
+        ChatMessage.Message message = ChatMessage.Message.parseFrom(data);
+        String formatted = message.getUsername() + ": " + message.getText();
+        System.out.println(formatted);
     }
 
     private class ReceiveMessages extends Thread {
         public void run() {
-            BufferedReader in = new BufferedReader(new InputStreamReader((System.in)));
+            BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
             try {
                 while (isUp) {
-                    String msg = in.readLine();
-                    handleData(msg);
+                    String message = in.readLine();
+                    handleData(message);
                 }
             } catch (IOException e) {
                 LOGGER.log(Level.WARNING, "UF TYPE receiving messages failure: " + e);
             }
         }
+    }
+
+    protected ChatMessage.Message buildMessage(String message, SelectableChannel socketChannel) throws IOException{
+        ChatMessage.Message.Builder messageBuilder = ChatMessage.Message.newBuilder();
+
+        SocketChannel channel;
+        ServerSocketChannel serverChannel;
+        String localAddress = "", remoteAddress = "";
+
+        if (socketChannel instanceof SocketChannel) {
+            channel = (SocketChannel) socketChannel;
+            localAddress = channel.socket().getLocalSocketAddress().toString();
+            remoteAddress = channel.socket().getRemoteSocketAddress().toString();
+
+        }
+        else {
+            serverChannel = (ServerSocketChannel) socketChannel;
+            localAddress = serverChannel.socket().getLocalSocketAddress().toString();
+            // Remote address will be configured when server dispatches all messages
+        }
+
+        messageBuilder.setUsername(username);
+        messageBuilder.setText(message);
+        messageBuilder.setSender(localAddress);
+        messageBuilder.setRecipient(remoteAddress);
+
+        return messageBuilder.build();
     }
 }

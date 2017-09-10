@@ -1,6 +1,7 @@
 package com.uftype.messenger.client;
 
 import com.uftype.messenger.common.Dispatcher;
+import com.uftype.messenger.proto.ChatMessage;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -13,14 +14,14 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
 
 import static java.nio.channels.SelectionKey.OP_CONNECT;
-import static java.nio.channels.SelectionKey.OP_WRITE;
+import static java.nio.channels.SelectionKey.OP_READ;
 
 public class ClientDispatcher extends Dispatcher {
-    private ConcurrentLinkedQueue<String> messageQueue; // Queue of incoming messages to be processed
+    private ConcurrentLinkedQueue<ChatMessage.Message> messageQueue; // Queue of incoming messages to be processed
 
-    public ClientDispatcher(InetSocketAddress address) throws IOException {
-        super(address);
-        messageQueue = new ConcurrentLinkedQueue<String>();
+    public ClientDispatcher(InetSocketAddress address, String username) throws IOException {
+        super(address, username);
+        messageQueue = new ConcurrentLinkedQueue<ChatMessage.Message>();
         LOGGER.log(Level.INFO, "Initializing UF TYPE chat client on host and port " + address.getHostName() + ":" + address.getPort());
     }
 
@@ -44,19 +45,18 @@ public class ClientDispatcher extends Dispatcher {
         SocketChannel socketChannel = (SocketChannel) handle.channel();
 
         while (!messageQueue.isEmpty()) {
-            String toSend = messageQueue.poll();
-            socketChannel.write(ByteBuffer.wrap(toSend.getBytes()));
+            ChatMessage.Message toSend = messageQueue.poll();
+            socketChannel.write(ByteBuffer.wrap(toSend.toByteArray()));
         }
 
-        handle.interestOps(SelectionKey.OP_READ);
+        handle.interestOps(OP_READ);
     }
 
     @Override
     protected void handleData(String message) throws IOException{
-        messageQueue.add(message);
         SelectionKey handle = channel.keyFor(selector);
-        //handle.attach(message.getBytes());
-        //handle.interestOps(OP_WRITE);
+        ChatMessage.Message chatMessage = buildMessage(message, handle.channel());
+        messageQueue.add(chatMessage);
         doWrite(handle);
     }
 }

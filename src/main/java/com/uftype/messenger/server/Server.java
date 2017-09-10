@@ -3,7 +3,6 @@ package com.uftype.messenger.server;
 import com.uftype.messenger.common.Dispatcher;
 
 import java.io.*;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -21,7 +20,7 @@ public class Server {
      */
     private void connect(int port) throws IOException {
         try {
-            Dispatcher serverDispatcher = new ServerDispatcher(new InetSocketAddress("127.0.0.1", port));
+            Dispatcher serverDispatcher = new ServerDispatcher(new InetSocketAddress("127.0.0.1", port), "UF TYPE Server");
             serverDispatcher.run();
         } catch (IOException e) {
             LOGGER.log(Level.WARNING, "UF TYPE server failure: " + e);
