@@ -10,11 +10,21 @@ import java.nio.ByteBuffer;
 import java.nio.channels.*;
 import java.util.logging.Level;
 
-public class ServerDispatcher extends Dispatcher {
+import static java.lang.System.arraycopy;
+import static java.nio.channels.SelectionKey.OP_CONNECT;
+import static java.nio.channels.SelectionKey.OP_READ;
+import static java.nio.channels.SelectionKey.OP_WRITE;
 
-    public ServerDispatcher(InetSocketAddress address, String username) throws IOException {
-        super(address, username);
+public class ServerDispatcher extends Dispatcher {
+    ChatMessage.Message.Builder welcome = ChatMessage.Message.newBuilder();
+
+    public ServerDispatcher(InetSocketAddress address) throws IOException {
+        super(address, "UF TYPE Server");
         LOGGER.log(Level.INFO, "Initializing UF TYPE chat server on host and port " + address.getAddress() + ":" + address.getPort());
+
+        welcome.setText("Welcome to UF TYPE Messenger Chat!");
+        welcome.setUsername(this.username);
+        welcome.setSender(address.toString());
     }
 
     @Override
@@ -33,16 +43,45 @@ public class ServerDispatcher extends Dispatcher {
     }
 
     @Override
-    protected void doWrite(SelectionKey handle) throws IOException {
-        SocketChannel socketChannel = (SocketChannel) handle.channel();
-        ByteBuffer buffer = (ByteBuffer) handle.attachment();
-        socketChannel.write(buffer);
-        handle.interestOps(SelectionKey.OP_READ);
+    protected void doAccept (SelectionKey handle) throws IOException {
+
+        try {
+            ServerSocketChannel serverSocketChannel = (ServerSocketChannel) handle.channel();
+            SocketChannel socketChannel = serverSocketChannel.accept();
+
+            if (socketChannel != null) {
+                String address = socketChannel.socket().getInetAddress() + ":" + socketChannel.socket().getPort();
+                socketChannel.configureBlocking(false);
+                socketChannel.register(selector, OP_READ, address);
+                welcome.setRecipient(socketChannel.socket().getLocalSocketAddress().toString()); // Set recipient of this message
+                socketChannel.write(ByteBuffer.wrap(welcome.build().toByteArray()));
+                System.out.println("Someone entered the chat room: " + address);
+            }
+        } catch (IOException e) {
+            LOGGER.log(Level.WARNING, "UF TYPE accept handler failure: " + e);
+        }
     }
 
     @Override
-    protected void handleData(String message) throws IOException{
+    protected void doWrite(SelectionKey handle) throws IOException {
+        ByteBuffer buffer = (ByteBuffer) handle.attachment(); // Retrieve the message
+
         for (SelectionKey key : selector.keys()) {
+            if (key.channel() instanceof SocketChannel) {
+                SocketChannel socketChannel = (SocketChannel) key.channel();
+
+                if (buffer != null) {
+                    socketChannel.write(buffer);
+                    buffer.flip();
+                }
+                key.interestOps(OP_READ);
+            }
+        }
+
+    }
+
+    protected void handleData(String message) throws IOException{
+        /*for (SelectionKey key : selector.keys()) {
             if (key.channel() instanceof SocketChannel && !key.equals(selector)) {
                 ChatMessage.Message chatMessage = buildMessage(message, key.channel());
 
@@ -51,8 +90,9 @@ public class ServerDispatcher extends Dispatcher {
                 chatBuilder.setRecipient(((SocketChannel) key.channel()).socket().getLocalSocketAddress().toString());
                 chatMessage = chatBuilder.build();
                 key.attach(ByteBuffer.wrap(chatMessage.toByteArray()));
-                doWrite(key);
+                //doWrite(key);
+                key.interestOps(OP_WRITE);
             }
-        }
+        }*/
     }
 }

@@ -13,19 +13,26 @@ import java.nio.channels.SocketChannel;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
 
+import static java.lang.System.arraycopy;
 import static java.nio.channels.SelectionKey.OP_CONNECT;
 import static java.nio.channels.SelectionKey.OP_READ;
+import static java.nio.channels.SelectionKey.OP_WRITE;
 
+/*
+ * Represents a client dispatcher which listens to messages and sends them to the server.
+ */
 public class ClientDispatcher extends Dispatcher {
     private ConcurrentLinkedQueue<ChatMessage.Message> messageQueue; // Queue of incoming messages to be processed
 
     public ClientDispatcher(InetSocketAddress address, String username) throws IOException {
         super(address, username);
         messageQueue = new ConcurrentLinkedQueue<ChatMessage.Message>();
-        LOGGER.log(Level.INFO, "Initializing UF TYPE chat client on host and port " + address.getHostName() + ":" + address.getPort());
     }
 
     @Override
+    /*
+     * Returns a SocketChannel that the dispatcher is connected to.
+     */
     protected SelectableChannel getChannel(InetSocketAddress address) throws IOException {
         SocketChannel socketChannel = SocketChannel.open();
         socketChannel.configureBlocking(false);
@@ -34,6 +41,9 @@ public class ClientDispatcher extends Dispatcher {
     }
 
     @Override
+    /*
+     * Returns the demultiplexor for the client dispatcher.
+     */
     protected Selector getSelector() throws IOException {
         Selector selector = Selector.open();
         channel.register(selector, OP_CONNECT);
@@ -41,22 +51,21 @@ public class ClientDispatcher extends Dispatcher {
     }
 
     @Override
+    /*
+     * Writes any messages to the server which are contained in the message queue.
+     */
     protected void doWrite(SelectionKey handle) throws IOException {
         SocketChannel socketChannel = (SocketChannel) handle.channel();
 
-        while (!messageQueue.isEmpty()) {
+        /*while (!messageQueue.isEmpty()) {
             ChatMessage.Message toSend = messageQueue.poll();
             socketChannel.write(ByteBuffer.wrap(toSend.toByteArray()));
+        }*/
+
+        ByteBuffer buffer = (ByteBuffer) handle.attachment();
+        if (buffer != null) {
+            socketChannel.write(buffer);
         }
-
         handle.interestOps(OP_READ);
-    }
-
-    @Override
-    protected void handleData(String message) throws IOException{
-        SelectionKey handle = channel.keyFor(selector);
-        ChatMessage.Message chatMessage = buildMessage(message, handle.channel());
-        messageQueue.add(chatMessage);
-        doWrite(handle);
     }
 }

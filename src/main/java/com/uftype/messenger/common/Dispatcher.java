@@ -14,9 +14,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static java.lang.System.arraycopy;
-import static java.nio.channels.SelectionKey.OP_READ;
 import static java.nio.channels.SelectionKey.OP_WRITE;
 
+/*
+ * Represents the dispatcher which is employed by client and server to facilitate message sending and receiving.
+ */
 public abstract class Dispatcher implements Runnable {
     protected ByteBuffer buffer; // Buffer for handling messages
     protected Selector selector; // Selector to demultiplex incoming channels
@@ -25,9 +27,7 @@ public abstract class Dispatcher implements Runnable {
     protected volatile boolean isUp; // True if running
     protected String username;
 
-    ChatMessage.Message.Builder welcome = ChatMessage.Message.newBuilder();
-
-    protected final Logger LOGGER = Logger.getLogger(Server.class.getName()); // Logger to provide information to server
+    protected final Logger LOGGER = Logger.getLogger(Server.class.getName());
 
     public Dispatcher(InetSocketAddress address, String username) throws IOException{
         this.address = address;
@@ -36,17 +36,15 @@ public abstract class Dispatcher implements Runnable {
         this.selector = getSelector();
         this.isUp = true;
         this.username = username;
-
-        welcome.setText("Welcome to UF TYPE Messenger Chat!");
-        welcome.setUsername(this.username);
-        welcome.setSender(address.toString());
     }
 
     protected abstract SelectableChannel getChannel(InetSocketAddress address) throws IOException;
     protected abstract Selector getSelector() throws IOException;
-    protected abstract void handleData(String message) throws IOException;
     protected abstract void doWrite(SelectionKey handle) throws IOException;
 
+    /*
+     * Closes all channels which are currently held by selector.
+     */
     public void stop() {
         try {
             isUp = false;
@@ -60,13 +58,16 @@ public abstract class Dispatcher implements Runnable {
     }
 
     @Override
+    /*
+     * Takes the next handle to handle, and calls appropriate handling function.
+     */
     public void run() {
         ReceiveMessages receiveThread = new ReceiveMessages();
         receiveThread.start();
 
         while (isUp) {
             try {
-                selector.select();
+                selector.select(); // Selects the next set of SelectionKeys to respond to
 
                 Iterator<SelectionKey> handleIterator = selector.selectedKeys().iterator();
 
@@ -84,33 +85,25 @@ public abstract class Dispatcher implements Runnable {
                         doWrite(handle);
                     }
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 LOGGER.log(Level.WARNING, "UF TYPE dispatcher failure: " + e);
+                stop();
             }
         }
 
-        stop();
+        stop(); // If errors occur, stop all channels
     }
 
-    protected void doAccept (SelectionKey handle) throws IOException {
-
-        try {
-            ServerSocketChannel serverSocketChannel = (ServerSocketChannel) handle.channel();
-            SocketChannel socketChannel = serverSocketChannel.accept();
-
-            if (socketChannel != null) {
-                String address = socketChannel.socket().getInetAddress() + ":" + socketChannel.socket().getPort();
-                socketChannel.configureBlocking(false);
-                socketChannel.register(selector, OP_READ, address);
-                welcome.setRecipient(socketChannel.socket().getLocalSocketAddress().toString()); // Set recipient of this message
-                socketChannel.write(ByteBuffer.wrap(welcome.build().toByteArray()));
-                System.out.println("Someone entered the chat room: " + address);
-            }
-        } catch (IOException e) {
-            LOGGER.log(Level.WARNING, "UF TYPE accept handler failure: " + e);
-        }
+    /*
+     * Accept connections; should only be implemented by ServerDispatcher
+     */
+    protected void doAccept (SelectionKey handle) throws Exception {
+        throw new Exception();
     }
 
+    /*
+     * Connect to SocketChannel
+     */
     protected void doConnect (SelectionKey handle) throws IOException {
         try {
             SocketChannel socketChannel = (SocketChannel) handle.channel();
@@ -127,6 +120,9 @@ public abstract class Dispatcher implements Runnable {
         }
     }
 
+    /*
+     * Perform a read operation on the incoming data. Print data to the screen.
+     */
     protected void doRead (SelectionKey handle) throws IOException {
         SocketChannel socketChannel = (SocketChannel) handle.channel();
         buffer.clear();
@@ -153,23 +149,40 @@ public abstract class Dispatcher implements Runnable {
 
         ChatMessage.Message message = ChatMessage.Message.parseFrom(data);
         String formatted = message.getUsername() + ": " + message.getText();
+
         System.out.println(formatted);
     }
 
+    /*
+     * Receive messages written to System.in and perform write operation on them.
+     */
     private class ReceiveMessages extends Thread {
         public void run() {
             BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
             try {
                 while (isUp) {
                     String message = in.readLine();
-                    handleData(message);
+                    SelectionKey key = channel.keyFor(selector); // Get the associated key to attach message
+                    ChatMessage.Message chatMessage = buildMessage(message, key.channel());
+                    key.attach(ByteBuffer.wrap(chatMessage.toByteArray()));
+                    doWrite(key);
+                    //key.interestOps(OP_WRITE);
                 }
             } catch (IOException e) {
                 LOGGER.log(Level.WARNING, "UF TYPE receiving messages failure: " + e);
             }
+
+            try {
+                in.close();
+            } catch (IOException e) {
+                LOGGER.log(Level.WARNING, "UF TYPE failure in closing buffered reader: " + e);
+            }
         }
     }
 
+    /*
+     * Build ChatMessage.Message as defined in ChatMessage.proto for communication.
+     */
     protected ChatMessage.Message buildMessage(String message, SelectableChannel socketChannel) throws IOException{
         ChatMessage.Message.Builder messageBuilder = ChatMessage.Message.newBuilder();
 
@@ -178,15 +191,16 @@ public abstract class Dispatcher implements Runnable {
         String localAddress = "", remoteAddress = "";
 
         if (socketChannel instanceof SocketChannel) {
+            // Represents a client channel
             channel = (SocketChannel) socketChannel;
             localAddress = channel.socket().getLocalSocketAddress().toString();
             remoteAddress = channel.socket().getRemoteSocketAddress().toString();
-
         }
         else {
+            // Represents the server channel
             serverChannel = (ServerSocketChannel) socketChannel;
             localAddress = serverChannel.socket().getLocalSocketAddress().toString();
-            // Remote address will be configured when server dispatches all messages
+            remoteAddress = "ALL";
         }
 
         messageBuilder.setUsername(username);

@@ -7,14 +7,20 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/*
+ * Represents the database connection to CISE Oracle database.
+ */
 public class Database {
     private static Connection conn;
-    private final static Logger LOGGER = Logger.getLogger(Database.class.getName()); // Logger to provide information to server
+    private final static Logger LOGGER = Logger.getLogger(Database.class.getName());
 
-    public synchronized static void connect() {
+    /*
+     * Returns true if can connect to the database using the username and password provided in properties file, false otherwise.
+     */
+    public synchronized static boolean connect() {
         if (conn != null) {
             // Connection is already established
-            return;
+            return true;
         }
 
         // Load the Oracle JDBC driver
@@ -22,50 +28,63 @@ public class Database {
             DriverManager.registerDriver(new oracle.jdbc.driver.OracleDriver());
         } catch (SQLException e) {
             LOGGER.log(Level.WARNING, "Unable to register the JDBC driver: " + e);
+            return false;
         }
 
+        // Try to load the properties file
         Properties properties = new Properties();
         try {
             properties.load(new FileInputStream("src/main/resources/db.properties"));
         } catch (IOException e) {
             System.out.println("Unable to read the database properties file: " + e);
+            return false;
         }
 
         // Connect to the database
-        // You must put a database name after the @ sign in the connection URL.
-        // You can use either the fully specified SQL*net syntax or a short cut
-        // syntax as <host>:<port>:<sid>.  The example uses the short cut syntax.
         try {
             conn = DriverManager.getConnection (properties.getProperty("url"),
                     properties.getProperty("username"), properties.getProperty("password"));
         } catch (SQLException e) {
             LOGGER.log(Level.WARNING, "Unable to connect to the database: " + e);
+            return false;
         }
+
+        return true;
     }
 
-    public synchronized static void disconnect() {
+    /*
+     * Returns true if can disconnect from the database connection, false otherwise.
+     */
+    public synchronized static boolean disconnect() {
         try {
             if (conn != null) {
-                conn.close(); // ** IMPORTANT : Close connections when done **
+                conn.close(); // Close only if connection exists
             }
         } catch (SQLException e) {
             LOGGER.log(Level.WARNING, "Unable to close the database connection: " + e);
+            return false;
         }
+
+        return true;
     }
 
+    /*
+     * Returns true if database successfully registers a user, false otherwise.
+     */
     public synchronized static boolean register(String firstname, String lastname, String username, String email, String securePassword, String salt) {
         try {
-            // Create a Statement
+            // Create a statement
             Statement stmt = conn.createStatement ();
 
-            // Select the ENAME column from the EMP table
-            ResultSet usernameCheck = stmt.executeQuery ("select * from user_account where user_name = '" + username + "'");
-            ResultSet emailCheck = stmt.executeQuery ("select * from user_account where email = '" + email + "'");
+            // Select users with the same username or email
+            ResultSet usernameCheck = stmt.executeQuery ("select id from user_account where user_name = '" + username + "'");
+            ResultSet emailCheck = stmt.executeQuery ("select id from user_account where email = '" + email + "'");
 
             if (usernameCheck.next() || emailCheck.next()) {
                 return false; // Email or username already exists
             }
 
+            // Generate query to insert user into the table
             String query = "insert into user_account " +
                     "(first_name, last_name, user_name, email, password, password_salt) values ('" +
                     firstname + "', '" + lastname + "', '" + username + "', '" + email + "', '" + securePassword + "', '" + salt + "')";
@@ -79,21 +98,25 @@ public class Database {
         return true;
     }
 
+    /*
+     * Returns true if provided credentials are correct, false otherwise.
+     */
     public synchronized static boolean validate(String username, String password) {
         try {
-            // Create a Statement
+            // Create a statement
             Statement stmt = conn.createStatement ();
 
-            // Select the ENAME column from the EMP table
+            // Find the user with the associated username
             ResultSet rset = stmt.executeQuery ("select password, password_salt from user_account where user_name = '" + username + "'");
 
             if (rset.next()) {
+                // Compare the secure password stored with a regenerated hash with the salt
                 String salt = rset.getString("password_salt");
                 String passwordToCompare = rset.getString("password");
                 return Authentication.hashMD5(password, salt).equals(passwordToCompare);
             }
             else {
-                return false;
+                return false; // Username does not exist in the database
             }
 
         } catch (SQLException e) {
@@ -101,14 +124,5 @@ public class Database {
         }
 
         return false;
-    }
-
-    public static void main(String[] args) throws SQLException{
-        Database.connect();
-
-        Database.register("Test", "Name", "testuser", "test@gmail.com", Authentication.hashMD5("password", "salt"), "salt");
-        System.out.println(Database.validate("testuser", "password"));
-
-        Database.disconnect();
     }
 }
