@@ -31,7 +31,11 @@ public class Receiver extends Thread {
         try {
             while (dispatcher.isUp) {
                 String message = in.readLine();
-                SelectionKey key = dispatcher.channel.keyFor(dispatcher.selector); // Get the associated key to attach message
+
+                // Get the associated key to attach message
+                SelectionKey key = dispatcher.channel.keyFor(dispatcher.selector);
+
+                // Build and attach message
                 ChatMessage.Message chatMessage = dispatcher.buildMessage(message, key.channel());
                 key.attach(ByteBuffer.wrap(chatMessage.toByteArray()));
                 dispatcher.doWrite(key);

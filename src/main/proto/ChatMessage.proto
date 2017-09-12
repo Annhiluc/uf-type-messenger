@@ -8,6 +8,7 @@ message Message {
     required string recipient = 3;
     required string username = 4;
     required string text = 5;
+    required ChatType type = 6;
 
     enum ChatType {
         TEXT = 1;

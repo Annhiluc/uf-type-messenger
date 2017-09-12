@@ -10,10 +10,8 @@ import java.nio.ByteBuffer;
 import java.nio.channels.*;
 import java.util.logging.Level;
 
-import static java.lang.System.arraycopy;
-import static java.nio.channels.SelectionKey.OP_CONNECT;
+import static java.nio.channels.SelectionKey.OP_ACCEPT;
 import static java.nio.channels.SelectionKey.OP_READ;
-import static java.nio.channels.SelectionKey.OP_WRITE;
 
 public class ServerDispatcher extends Dispatcher {
     ChatMessage.Message.Builder welcome = ChatMessage.Message.newBuilder();
@@ -23,9 +21,13 @@ public class ServerDispatcher extends Dispatcher {
         welcome.setText("Welcome to UF TYPE Messenger Chat!");
         welcome.setUsername(this.username);
         welcome.setSender(address.toString());
+        welcome.setType(ChatMessage.Message.ChatType.TEXT);
     }
 
     @Override
+    /*
+     * Returns a ServerSocketChannel that the dispatcher is connected to.
+     */
     protected SelectableChannel getChannel(InetSocketAddress address) throws IOException {
         ServerSocketChannel socketChannel = ServerSocketChannel.open();
         socketChannel.configureBlocking(false);
@@ -34,13 +36,19 @@ public class ServerDispatcher extends Dispatcher {
     }
 
     @Override
+    /*
+     * Returns the demultiplexor for the client dispatcher.
+     */
     protected Selector getSelector() throws IOException {
         Selector selector = Selector.open();
-        channel.register(selector, SelectionKey.OP_ACCEPT);
+        channel.register(selector, OP_ACCEPT);
         return selector;
     }
 
     @Override
+    /*
+     * Accept connections; should only be implemented by ServerDispatcher.
+     */
     protected void doAccept (SelectionKey handle) throws IOException {
 
         try {
@@ -51,7 +59,9 @@ public class ServerDispatcher extends Dispatcher {
                 String address = socketChannel.socket().getInetAddress() + ":" + socketChannel.socket().getPort();
                 socketChannel.configureBlocking(false);
                 socketChannel.register(selector, OP_READ, address);
-                welcome.setRecipient(socketChannel.socket().getLocalSocketAddress().toString()); // Set recipient of this message
+
+                // Build and send welcome message
+                welcome.setRecipient(socketChannel.socket().getLocalSocketAddress().toString());
                 socketChannel.write(ByteBuffer.wrap(welcome.build().toByteArray()));
                 System.out.println("Someone entered the chat room: " + address);
             }
@@ -61,6 +71,9 @@ public class ServerDispatcher extends Dispatcher {
     }
 
     @Override
+    /*
+     * Writes any messages by broadcasting to all handles kept by the selector.
+     */
     protected void doWrite(SelectionKey handle) throws IOException {
         ByteBuffer buffer = (ByteBuffer) handle.attachment(); // Retrieve the message
 
@@ -76,21 +89,5 @@ public class ServerDispatcher extends Dispatcher {
             }
         }
 
-    }
-
-    protected void handleData(String message) throws IOException{
-        /*for (SelectionKey key : selector.keys()) {
-            if (key.channel() instanceof SocketChannel && !key.equals(selector)) {
-                ChatMessage.Message chatMessage = buildMessage(message, key.channel());
-
-                // Set remote address here for message - need to change this to avoid making a builder every time
-                ChatMessage.Message.Builder chatBuilder = chatMessage.toBuilder();
-                chatBuilder.setRecipient(((SocketChannel) key.channel()).socket().getLocalSocketAddress().toString());
-                chatMessage = chatBuilder.build();
-                key.attach(ByteBuffer.wrap(chatMessage.toByteArray()));
-                //doWrite(key);
-                key.interestOps(OP_WRITE);
-            }
-        }*/
     }
 }

@@ -1,5 +1,8 @@
 package com.uftype.messenger.auth;
 
+import com.uftype.messenger.common.UserContext;
+
+import javax.xml.crypto.Data;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -11,13 +14,15 @@ import java.util.logging.Logger;
  * Represents the authentication module to register, login, and logout users.
  */
 public class Authentication {
+    private static Database database = new SqlDatabase();
     private final static Logger LOGGER = Logger.getLogger(Authentication.class.getName());
     private final static Random RANDOM = new Random();
 
+
     /*
-     * Returns true if login is successful using provided credentials, false otherwise.
+     * Returns a UserContext if login is successful using provided credentials, null otherwise.
      */
-    public static boolean login(String username, String password) {
+    public static UserContext login(String username, String password) {
         return authenticate(username, password);
     }
 
@@ -32,34 +37,32 @@ public class Authentication {
      * Returns true if register is successful using provided credentials, false otherwise.
      */
     public static boolean register(String firstname, String lastname, String username, String email, String password) {
-        boolean isRegistered;
-        if (Database.connect()) {
+        boolean isRegistered = false;
+        if (database.connect()) {
             String salt = generateSalt();
             String securePassword = hashMD5(password, salt); // This secure password wil be stored in the database
 
-            isRegistered = Database.register(firstname, lastname, username, email, securePassword, salt);
+            isRegistered = database.register(firstname, lastname, username, email, securePassword, salt);
 
-            Database.disconnect();
-            return isRegistered;
-        } else {
-            return false;
+            database.disconnect();
+            return true;
         }
+
+        return isRegistered;
     }
 
     /*
      * Returns true if authentication is successful using provided credentials, false otherwise.
      */
-    public static boolean authenticate(String username, String password) {
-        boolean isAuthenticated;
-        if (Database.connect()) {
-            isAuthenticated = Database.validate(username, password);
+    public static UserContext authenticate(String username, String password) {
+        UserContext isAuthenticated = null;
+        if (database.connect()) {
+            isAuthenticated = database.validate(username, password);
 
-            Database.disconnect();
-            return isAuthenticated;
+            database.disconnect();
         }
-        else {
-            return false;
-        }
+
+        return isAuthenticated;
     }
 
     /*

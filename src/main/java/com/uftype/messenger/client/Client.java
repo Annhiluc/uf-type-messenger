@@ -13,7 +13,7 @@ import java.util.logging.Logger;
  * Represents the chat client.
  */
 public class Client{
-    private final static Logger LOGGER = Logger.getLogger(Client.class.getName()); // Logger to provide information to server
+    private final static Logger LOGGER = Logger.getLogger(Client.class.getName());
     private static Dispatcher clientDispatcher;
     private static Receiver clientReceiver;
 
@@ -28,7 +28,8 @@ public class Client{
         try {
             clientDispatcher = new ClientDispatcher(new InetSocketAddress(host, port), username);
             clientReceiver = new Receiver(clientDispatcher);
-            LOGGER.log(Level.INFO, "The UF TYPE chat client is initialized on " + host + ":" + port + ". It is ready for chatting!");
+            LOGGER.log(Level.INFO, "The UF TYPE chat client is initialized on " +
+                    host + ":" + port + ". It is ready for chatting!");
             clientReceiver.start();
             clientDispatcher.run();
         } catch (IOException e) {

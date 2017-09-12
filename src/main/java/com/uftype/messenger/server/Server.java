@@ -28,7 +28,8 @@ public class Server {
         try {
             serverDispatcher = new ServerDispatcher(new InetSocketAddress("127.0.0.1", port));
             serverReceiver = new Receiver(serverDispatcher);
-            LOGGER.log(Level.INFO, "The UF TYPE chat server is initialized on port " + port + ". It is ready for chatting!");
+            LOGGER.log(Level.INFO, "The UF TYPE chat server is initialized on port " +
+                    port + ". It is ready for chatting!");
             serverReceiver.start();
             serverDispatcher.run();
         } catch (IOException e) {

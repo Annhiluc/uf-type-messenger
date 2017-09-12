@@ -1,11 +1,8 @@
 package com.uftype.messenger.common;
 
 import com.uftype.messenger.proto.ChatMessage;
-import com.uftype.messenger.server.Server;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.*;
@@ -38,8 +35,19 @@ public abstract class Dispatcher implements Runnable {
         this.username = username;
     }
 
+    /*
+     * Returns a SelectableChannel that the dispatcher is connected to.
+     */
     protected abstract SelectableChannel getChannel(InetSocketAddress address) throws IOException;
+
+    /*
+     * Returns the demultiplexor for the client dispatcher.
+     */
     protected abstract Selector getSelector() throws IOException;
+
+    /*
+     * Writes any messages connected to the handle.
+     */
     protected abstract void doWrite(SelectionKey handle) throws IOException;
 
     /*
@@ -92,14 +100,14 @@ public abstract class Dispatcher implements Runnable {
     }
 
     /*
-     * Accept connections; should only be implemented by ServerDispatcher
+     * Accept connections; should only be implemented by ServerDispatcher.
      */
     protected void doAccept (SelectionKey handle) throws Exception {
         throw new Exception();
     }
 
     /*
-     * Connect to SocketChannel
+     * Connect to SocketChannel.
      */
     protected void doConnect (SelectionKey handle) throws IOException {
         try {
@@ -177,6 +185,7 @@ public abstract class Dispatcher implements Runnable {
         messageBuilder.setText(message);
         messageBuilder.setSender(localAddress);
         messageBuilder.setRecipient(remoteAddress);
+        messageBuilder.setType(ChatMessage.Message.ChatType.TEXT);
 
         return messageBuilder.build();
     }
