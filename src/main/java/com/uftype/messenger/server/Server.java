@@ -1,6 +1,7 @@
 package com.uftype.messenger.server;
 
 import com.uftype.messenger.common.Dispatcher;
+import com.uftype.messenger.common.Receiver;
 
 import java.io.*;
 import java.net.InetSocketAddress;
@@ -13,9 +14,9 @@ import java.util.logging.Logger;
 public class Server {
     private final static Logger LOGGER = Logger.getLogger(Server.class.getName());
     private static Dispatcher serverDispatcher;
+    private static Receiver serverReceiver;
 
     public Server(int port) throws IOException {
-        LOGGER.log(Level.INFO, "The UF TYPE chat server is initialized. It is ready for chatting!");
         connect(port);
     }
 
@@ -26,6 +27,9 @@ public class Server {
     private void connect(int port) throws IOException {
         try {
             serverDispatcher = new ServerDispatcher(new InetSocketAddress("127.0.0.1", port));
+            serverReceiver = new Receiver(serverDispatcher);
+            LOGGER.log(Level.INFO, "The UF TYPE chat server is initialized on port " + port + ". It is ready for chatting!");
+            serverReceiver.start();
             serverDispatcher.run();
         } catch (IOException e) {
             LOGGER.log(Level.WARNING, "UF TYPE server failure: " + e);
@@ -36,6 +40,7 @@ public class Server {
      * Disconnect the server dispatcher.
      */
     private void disconnect() {
+        serverReceiver = null;
         serverDispatcher.stop();
     }
 

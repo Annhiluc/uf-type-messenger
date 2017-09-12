@@ -20,8 +20,6 @@ public class ServerDispatcher extends Dispatcher {
 
     public ServerDispatcher(InetSocketAddress address) throws IOException {
         super(address, "UF TYPE Server");
-        LOGGER.log(Level.INFO, "Initializing UF TYPE chat server on host and port " + address.getAddress() + ":" + address.getPort());
-
         welcome.setText("Welcome to UF TYPE Messenger Chat!");
         welcome.setUsername(this.username);
         welcome.setSender(address.toString());

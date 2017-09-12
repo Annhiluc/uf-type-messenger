@@ -27,7 +27,7 @@ public abstract class Dispatcher implements Runnable {
     protected volatile boolean isUp; // True if running
     protected String username;
 
-    protected final Logger LOGGER = Logger.getLogger(Server.class.getName());
+    protected final Logger LOGGER = Logger.getLogger(Dispatcher.class.getName());
 
     public Dispatcher(InetSocketAddress address, String username) throws IOException{
         this.address = address;
@@ -62,9 +62,6 @@ public abstract class Dispatcher implements Runnable {
      * Takes the next handle to handle, and calls appropriate handling function.
      */
     public void run() {
-        ReceiveMessages receiveThread = new ReceiveMessages();
-        receiveThread.start();
-
         while (isUp) {
             try {
                 selector.select(); // Selects the next set of SelectionKeys to respond to
@@ -151,33 +148,6 @@ public abstract class Dispatcher implements Runnable {
         String formatted = message.getUsername() + ": " + message.getText();
 
         System.out.println(formatted);
-    }
-
-    /*
-     * Receive messages written to System.in and perform write operation on them.
-     */
-    private class ReceiveMessages extends Thread {
-        public void run() {
-            BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-            try {
-                while (isUp) {
-                    String message = in.readLine();
-                    SelectionKey key = channel.keyFor(selector); // Get the associated key to attach message
-                    ChatMessage.Message chatMessage = buildMessage(message, key.channel());
-                    key.attach(ByteBuffer.wrap(chatMessage.toByteArray()));
-                    doWrite(key);
-                    //key.interestOps(OP_WRITE);
-                }
-            } catch (IOException e) {
-                LOGGER.log(Level.WARNING, "UF TYPE receiving messages failure: " + e);
-            }
-
-            try {
-                in.close();
-            } catch (IOException e) {
-                LOGGER.log(Level.WARNING, "UF TYPE failure in closing buffered reader: " + e);
-            }
-        }
     }
 
     /*

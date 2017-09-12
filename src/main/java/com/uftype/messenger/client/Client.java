@@ -1,6 +1,7 @@
 package com.uftype.messenger.client;
 
 import com.uftype.messenger.common.Dispatcher;
+import com.uftype.messenger.common.Receiver;
 
 import java.io.*;
 import java.net.InetSocketAddress;
@@ -14,6 +15,7 @@ import java.util.logging.Logger;
 public class Client{
     private final static Logger LOGGER = Logger.getLogger(Client.class.getName()); // Logger to provide information to server
     private static Dispatcher clientDispatcher;
+    private static Receiver clientReceiver;
 
     public Client(String host, int port, String username) throws IOException {
         connect(host, port, username);
@@ -24,9 +26,10 @@ public class Client{
      */
     private void connect(String host, int port, String username) throws IOException {
         try {
-            LOGGER.log(Level.INFO, "Initializing UF TYPE chat client on host and port " + host + ":" + port);
             clientDispatcher = new ClientDispatcher(new InetSocketAddress(host, port), username);
-            LOGGER.log(Level.INFO, "The UF TYPE chat client is initialized. It is ready for chatting!");
+            clientReceiver = new Receiver(clientDispatcher);
+            LOGGER.log(Level.INFO, "The UF TYPE chat client is initialized on " + host + ":" + port + ". It is ready for chatting!");
+            clientReceiver.start();
             clientDispatcher.run();
         } catch (IOException e) {
             LOGGER.log(Level.WARNING, "UF TYPE client failure: " + e);
@@ -37,6 +40,7 @@ public class Client{
      * Stops the client dispatcher from listening to requests.
      */
     private void disconnect() {
+        clientReceiver = null;
         clientDispatcher.stop();
     }
 
