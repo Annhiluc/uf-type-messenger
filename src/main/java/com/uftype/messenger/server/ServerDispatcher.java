@@ -1,6 +1,7 @@
 package com.uftype.messenger.server;
 
 
+import com.uftype.messenger.common.Communication;
 import com.uftype.messenger.common.Dispatcher;
 import com.uftype.messenger.proto.ChatMessage;
 
@@ -88,6 +89,33 @@ public class ServerDispatcher extends Dispatcher {
                 key.interestOps(OP_READ);
             }
         }
+    }
 
+    @Override
+    /*
+     * Handle data based on type of message.
+     */
+    protected void handleData (ChatMessage.Message message) throws IOException {
+        // Get the associated key to attach message
+        SelectionKey key = channel.keyFor(selector);
+
+        switch (message.getType()) {
+            case LOGIN:
+                // Mirror request to client side to handle
+            case LOGOUT:
+                // Mirror request to client side to handle
+            case NEWUSER:
+                // Mirror request to client side to handle
+                ChatMessage.Message request = Communication.buildMessage("", username,
+                        key.channel(), message.getType());
+                key.attach(ByteBuffer.wrap(request.toByteArray()));
+                doWrite(key);
+                break;
+            case CLOSE:
+                System.out.println("Another connection has disconnected.");
+                break;
+            default:
+                break;
+        }
     }
 }

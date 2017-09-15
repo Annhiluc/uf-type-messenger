@@ -7,7 +7,7 @@ message Message {
     required string sender = 2;
     required string recipient = 3;
     required string username = 4;
-    required string text = 5;
+    optional string text = 5;
     required ChatType type = 6;
 
     enum ChatType {
@@ -17,11 +17,6 @@ message Message {
         NEWUSER = 4;
         FILE = 5;
         CODE = 6;
-        PING = 7;
-        CLOSE = 8;
+        CLOSE = 7;
     }
-}
-
-message MessageQueue {
-    repeated Message messages = 1;
 }

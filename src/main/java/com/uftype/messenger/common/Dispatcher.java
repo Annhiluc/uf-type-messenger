@@ -1,6 +1,7 @@
 package com.uftype.messenger.common;
 
 import com.uftype.messenger.proto.ChatMessage;
+import jdk.nashorn.internal.codegen.CompileUnit;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -49,6 +50,11 @@ public abstract class Dispatcher implements Runnable {
      * Writes any messages connected to the handle.
      */
     protected abstract void doWrite(SelectionKey handle) throws IOException;
+
+    /*
+     * Handle data based on type of message.
+     */
+    protected abstract void handleData (ChatMessage.Message message) throws IOException;
 
     /*
      * Closes all channels which are currently held by selector.
@@ -129,64 +135,38 @@ public abstract class Dispatcher implements Runnable {
      * Perform a read operation on the incoming data. Print data to the screen.
      */
     protected void doRead (SelectionKey handle) throws IOException {
-        SocketChannel socketChannel = (SocketChannel) handle.channel();
-        buffer.clear();
+            SocketChannel socketChannel = (SocketChannel) handle.channel();
+            buffer.clear();
 
-        int read;
+            int read;
 
-        try {
-            read = socketChannel.read(buffer);
-        } catch (IOException e) {
-            LOGGER.log(Level.WARNING, "UF TYPE read handler failure: " + e);
-            handle.cancel();
-            socketChannel.close();
-            return;
-        }
+            try {
+                read = socketChannel.read(buffer);
+            } catch (IOException e) {
+                System.out.println("Another connection has disconnected.");
+                handle.cancel();
+                socketChannel.close();
+                return;
+            }
 
-        if (read == -1) {
-            handle.channel().close();
-            handle.cancel();
-            return;
-        }
+            if (read == -1) {
+                handle.channel().close();
+                handle.cancel();
+                return;
+            }
 
-        byte[] data = new byte[buffer.position()];
-        arraycopy(buffer.array(), 0, data, 0, buffer.position());
+            byte[] data = new byte[buffer.position()];
+            arraycopy(buffer.array(), 0, data, 0, buffer.position());
 
-        ChatMessage.Message message = ChatMessage.Message.parseFrom(data);
-        String formatted = message.getUsername() + ": " + message.getText();
+            ChatMessage.Message message = ChatMessage.Message.parseFrom(data);
 
-        System.out.println(formatted);
-    }
-
-    /*
-     * Build ChatMessage.Message as defined in ChatMessage.proto for communication.
-     */
-    protected ChatMessage.Message buildMessage(String message, SelectableChannel socketChannel) throws IOException{
-        ChatMessage.Message.Builder messageBuilder = ChatMessage.Message.newBuilder();
-
-        SocketChannel channel;
-        ServerSocketChannel serverChannel;
-        String localAddress = "", remoteAddress = "";
-
-        if (socketChannel instanceof SocketChannel) {
-            // Represents a client channel
-            channel = (SocketChannel) socketChannel;
-            localAddress = channel.socket().getLocalSocketAddress().toString();
-            remoteAddress = channel.socket().getRemoteSocketAddress().toString();
-        }
-        else {
-            // Represents the server channel
-            serverChannel = (ServerSocketChannel) socketChannel;
-            localAddress = serverChannel.socket().getLocalSocketAddress().toString();
-            remoteAddress = "ALL";
-        }
-
-        messageBuilder.setUsername(username);
-        messageBuilder.setText(message);
-        messageBuilder.setSender(localAddress);
-        messageBuilder.setRecipient(remoteAddress);
-        messageBuilder.setType(ChatMessage.Message.ChatType.TEXT);
-
-        return messageBuilder.build();
+            // Depending on the type of message, handle data
+            if (message.getType() == ChatMessage.Message.ChatType.TEXT) {
+                String formatted = message.getUsername() + ": " + message.getText();
+                System.out.println(formatted);
+            }
+            else {
+                handleData(message);
+            }
     }
 }
