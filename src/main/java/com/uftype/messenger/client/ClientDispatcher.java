@@ -18,7 +18,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import static java.nio.channels.SelectionKey.OP_CONNECT;
 import static java.nio.channels.SelectionKey.OP_READ;
 
-/*
+/**
  * Represents a client dispatcher which listens to messages and sends them to the server.
  */
 public class ClientDispatcher extends Dispatcher {
@@ -29,10 +29,10 @@ public class ClientDispatcher extends Dispatcher {
         messageQueue = new ConcurrentLinkedQueue<ChatMessage.Message>();
     }
 
-    @Override
-    /*
+    /**
      * Returns a SocketChannel that the dispatcher is connected to.
      */
+    @Override
     protected SelectableChannel getChannel(InetSocketAddress address) throws IOException {
         SocketChannel socketChannel = SocketChannel.open();
         socketChannel.configureBlocking(false);
@@ -40,20 +40,20 @@ public class ClientDispatcher extends Dispatcher {
         return socketChannel;
     }
 
-    @Override
-    /*
+    /**
      * Returns the demultiplexor for the client dispatcher.
      */
+    @Override
     protected Selector getSelector() throws IOException {
         Selector selector = Selector.open();
         channel.register(selector, OP_CONNECT);
         return selector;
     }
 
-    @Override
-    /*
+    /**
      * Writes any messages to the server which are contained in the message queue.
      */
+    @Override
     protected void doWrite(SelectionKey handle) throws IOException {
         SocketChannel socketChannel = (SocketChannel) handle.channel();
 
@@ -69,10 +69,10 @@ public class ClientDispatcher extends Dispatcher {
         handle.interestOps(OP_READ);
     }
 
-    @Override
-    /*
+    /**
      * Handle data based on type of message.
      */
+    @Override
     protected void handleData (ChatMessage.Message message) {
         switch (message.getType()) {
             case LOGIN:

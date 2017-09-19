@@ -14,7 +14,7 @@ import java.util.logging.Logger;
 import static java.lang.System.arraycopy;
 import static java.nio.channels.SelectionKey.OP_WRITE;
 
-/*
+/**
  * Represents the dispatcher which is employed by client and server to facilitate message sending and receiving.
  */
 public abstract class Dispatcher implements Runnable {
@@ -36,27 +36,27 @@ public abstract class Dispatcher implements Runnable {
         this.username = username;
     }
 
-    /*
+    /**
      * Returns a SelectableChannel that the dispatcher is connected to.
      */
     protected abstract SelectableChannel getChannel(InetSocketAddress address) throws IOException;
 
-    /*
+    /**
      * Returns the demultiplexor for the client dispatcher.
      */
     protected abstract Selector getSelector() throws IOException;
 
-    /*
+    /**
      * Writes any messages connected to the handle.
      */
     protected abstract void doWrite(SelectionKey handle) throws IOException;
 
-    /*
+    /**
      * Handle data based on type of message.
      */
     protected abstract void handleData (ChatMessage.Message message) throws IOException;
 
-    /*
+    /**
      * Closes all channels which are currently held by selector.
      */
     public void stop() {
@@ -71,10 +71,10 @@ public abstract class Dispatcher implements Runnable {
         }
     }
 
-    @Override
-    /*
+    /**
      * Takes the next handle to handle, and calls appropriate handling function.
      */
+    @Override
     public void run() {
         while (isUp) {
             try {
@@ -105,14 +105,14 @@ public abstract class Dispatcher implements Runnable {
         stop(); // If errors occur, stop all channels
     }
 
-    /*
+    /**
      * Accept connections; should only be implemented by ServerDispatcher.
      */
     protected void doAccept (SelectionKey handle) throws Exception {
         throw new Exception();
     }
 
-    /*
+    /**
      * Connect to SocketChannel.
      */
     protected void doConnect (SelectionKey handle) throws IOException {
@@ -131,7 +131,7 @@ public abstract class Dispatcher implements Runnable {
         }
     }
 
-    /*
+    /**
      * Perform a read operation on the incoming data. Print data to the screen.
      */
     protected void doRead (SelectionKey handle) throws IOException {

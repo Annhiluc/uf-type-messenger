@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/uf_type_messenger.iml" filepath="$PROJECT_DIR$/uf_type_messenger.iml" />
+      <module fileurl="file://$PROJECT_DIR$/uftypemessenger.iml" filepath="$PROJECT_DIR$/uftypemessenger.iml" />
     </modules>
   </component>
 </project>

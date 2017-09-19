@@ -2,6 +2,7 @@ package com.uftype.messenger.client;
 
 import com.uftype.messenger.common.Dispatcher;
 import com.uftype.messenger.common.Receiver;
+import com.uftype.messenger.gui.ClientGUI;
 
 import java.io.*;
 import java.net.InetSocketAddress;
@@ -9,7 +10,7 @@ import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/*
+/**
  * Represents the chat client.
  */
 public class Client{
@@ -21,7 +22,7 @@ public class Client{
         connect(host, port, username);
     }
 
-    /*
+    /**
      * Accept communications from the server. Pushes all information onto the screen.
      */
     private void connect(String host, int port, String username) throws IOException {
@@ -30,6 +31,10 @@ public class Client{
             clientReceiver = new Receiver(clientDispatcher);
             LOGGER.log(Level.INFO, "The UF TYPE chat client is initialized on " +
                     host + ":" + port + ". It is ready for chatting!");
+
+            // Set up GUI
+            ClientGUI gui = new ClientGUI(this);
+
             clientReceiver.start();
             clientDispatcher.run();
         } catch (IOException e) {
@@ -37,7 +42,7 @@ public class Client{
         }
     }
 
-    /*
+    /**
      * Stops the client dispatcher from listening to requests.
      */
     private void disconnect() {

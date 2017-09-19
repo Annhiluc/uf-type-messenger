@@ -25,10 +25,10 @@ public class ServerDispatcher extends Dispatcher {
         welcome.setType(ChatMessage.Message.ChatType.TEXT);
     }
 
-    @Override
-    /*
+    /**
      * Returns a ServerSocketChannel that the dispatcher is connected to.
      */
+    @Override
     protected SelectableChannel getChannel(InetSocketAddress address) throws IOException {
         ServerSocketChannel socketChannel = ServerSocketChannel.open();
         socketChannel.configureBlocking(false);
@@ -36,20 +36,20 @@ public class ServerDispatcher extends Dispatcher {
         return socketChannel;
     }
 
-    @Override
-    /*
+    /**
      * Returns the demultiplexor for the client dispatcher.
      */
+    @Override
     protected Selector getSelector() throws IOException {
         Selector selector = Selector.open();
         channel.register(selector, OP_ACCEPT);
         return selector;
     }
 
-    @Override
-    /*
+    /**
      * Accept connections; should only be implemented by ServerDispatcher.
      */
+    @Override
     protected void doAccept (SelectionKey handle) throws IOException {
 
         try {
@@ -71,10 +71,10 @@ public class ServerDispatcher extends Dispatcher {
         }
     }
 
-    @Override
-    /*
+    /**
      * Writes any messages by broadcasting to all handles kept by the selector.
      */
+    @Override
     protected void doWrite(SelectionKey handle) throws IOException {
         ByteBuffer buffer = (ByteBuffer) handle.attachment(); // Retrieve the message
 
@@ -91,10 +91,10 @@ public class ServerDispatcher extends Dispatcher {
         }
     }
 
-    @Override
-    /*
+    /**
      * Handle data based on type of message.
      */
+    @Override
     protected void handleData (ChatMessage.Message message) throws IOException {
         // Get the associated key to attach message
         SelectionKey key = channel.keyFor(selector);

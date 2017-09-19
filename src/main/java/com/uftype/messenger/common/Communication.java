@@ -8,11 +8,11 @@ import java.nio.channels.SelectableChannel;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 
-/*
+/**
  * Represents methods to help build messages to send between clients and servers.
  */
 public class Communication {
-    /*
+    /**
      * Build ChatMessage.Message as defined in ChatMessage.proto for communication.
      */
     public static ChatMessage.Message buildMessage(String message, String username, SelectableChannel socketChannel,
@@ -25,7 +25,7 @@ public class Communication {
         return messageBuilder.build();
     }
 
-    /*
+    /**
      * Sets up a message builder with the username, recipient, and sender of the message.
      * The text, type, and username of the message still need to be set.
      */

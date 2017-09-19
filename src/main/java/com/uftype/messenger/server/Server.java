@@ -2,13 +2,14 @@ package com.uftype.messenger.server;
 
 import com.uftype.messenger.common.Dispatcher;
 import com.uftype.messenger.common.Receiver;
+import com.uftype.messenger.gui.ServerGUI;
 
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/*
+/**
  * Represents the chat server.
  */
 public class Server {
@@ -20,7 +21,7 @@ public class Server {
         connect(port);
     }
 
-    /*
+    /**
      * Accept communications from the port from multiple clients. Push all information onto the screen.
      * Broadcast information to clients.
      */
@@ -30,6 +31,10 @@ public class Server {
             serverReceiver = new Receiver(serverDispatcher);
             LOGGER.log(Level.INFO, "The UF TYPE chat server is initialized on port " +
                     port + ". It is ready for chatting!");
+
+            // Set up ServerGUI
+            ServerGUI gui = new ServerGUI(this);
+
             serverReceiver.start();
             serverDispatcher.run();
         } catch (IOException e) {
@@ -37,7 +42,7 @@ public class Server {
         }
     }
 
-    /*
+    /**
      * Disconnect the server dispatcher.
      */
     private void disconnect() {

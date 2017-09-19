@@ -11,7 +11,7 @@ import java.nio.channels.SelectionKey;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/*
+/**
  * Represents the receiver which is employed by client and server to facilitate message sending and receiving.
  */
 public class Receiver extends Thread {
@@ -23,7 +23,7 @@ public class Receiver extends Thread {
         this.dispatcher = dispatcher;
     }
 
-    /*
+    /**
      * Receive messages written to System.in and perform write operation on them.
      */
     public void run() {

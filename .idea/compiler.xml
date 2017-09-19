@@ -6,11 +6,11 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="uf_type_messenger" />
+        <module name="uftypemessenger" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="uf_type_messenger" target="1.6" />
+      <module name="uftypemessenger" target="1.6" />
     </bytecodeTargetLevel>
   </component>
 </project>

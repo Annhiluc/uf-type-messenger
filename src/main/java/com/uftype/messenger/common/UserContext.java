@@ -1,6 +1,6 @@
 package com.uftype.messenger.common;
 
-/*
+/**
  * Represents user information when connecting to a server.
  */
 public class UserContext {

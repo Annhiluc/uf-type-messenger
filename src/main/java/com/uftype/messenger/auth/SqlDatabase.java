@@ -11,15 +11,15 @@ import java.sql.Statement;
 import java.util.Properties;
 import java.util.logging.Level;
 
-/*
+/**
  * Represents the database connection to CISE Oracle database.
  */
 public class SqlDatabase extends Database {
-    @Override
-    /*
+    /**
      * Returns true if can connect to the database using the username and password
      * provided in properties file, false otherwise.
      */
+    @Override
     public synchronized boolean connect() {
         if (conn != null) {
             // Connection is already established
@@ -55,10 +55,10 @@ public class SqlDatabase extends Database {
         return true;
     }
 
-    @Override
-    /*
+    /**
      * Returns true if can disconnect from the database connection, false otherwise.
      */
+    @Override
     public synchronized boolean disconnect() {
         try {
             if (conn != null) {
@@ -72,10 +72,10 @@ public class SqlDatabase extends Database {
         return true;
     }
 
-    @Override
-    /*
+    /**
      * Returns true if database successfully registers a user, false otherwise.
      */
+    @Override
     public synchronized boolean register(String firstname, String lastname, String username, String email,
                                          String securePassword, String salt) {
         try {
@@ -107,10 +107,10 @@ public class SqlDatabase extends Database {
         return true;
     }
 
-    @Override
-    /*
+    /**
      * Returns true if provided credentials are correct, false otherwise.
      */
+    @Override
     public synchronized UserContext validate(String username, String password) {
         try {
             // Create a statement
