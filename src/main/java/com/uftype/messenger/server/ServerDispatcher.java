@@ -17,15 +17,19 @@ import static java.nio.channels.SelectionKey.OP_READ;
 
 public class ServerDispatcher extends Dispatcher {
     ChatMessage.Message.Builder welcome = ChatMessage.Message.newBuilder();
-    ServerGUI gui;
 
-    public ServerDispatcher(InetSocketAddress address, ServerGUI gui) throws IOException {
-        super(address, "UF TYPE Server");
+    public ServerDispatcher(InetSocketAddress address) throws IOException {
+        super(address);
+        username = "UF TYPE Server";
         welcome.setText("Welcome to UF TYPE Messenger Chat!");
         welcome.setUsername(this.username);
         welcome.setSender(address.toString());
         welcome.setType(ChatMessage.Message.ChatType.TEXT);
-        this.gui = gui;
+
+
+        // Set up ServerGUI
+        ServerGUI gui = new ServerGUI(this);
+        setGUI(gui);
     }
 
     /**
@@ -78,7 +82,7 @@ public class ServerDispatcher extends Dispatcher {
      * Writes any messages by broadcasting to all handles kept by the selector.
      */
     @Override
-    protected void doWrite(SelectionKey handle) throws IOException {
+    public void doWrite(SelectionKey handle) throws IOException {
         ByteBuffer buffer = (ByteBuffer) handle.attachment(); // Retrieve the message
 
         for (SelectionKey key : selector.keys()) {

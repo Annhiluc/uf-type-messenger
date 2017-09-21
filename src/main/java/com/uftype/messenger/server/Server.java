@@ -27,12 +27,10 @@ public class Server {
      */
     private void connect(int port) throws IOException {
         try {
-            // Set up ServerGUI
-            ServerGUI gui = new ServerGUI(this);
-
-            serverDispatcher = new ServerDispatcher(new InetSocketAddress("127.0.0.1", port), gui);
+            serverDispatcher = new ServerDispatcher(new InetSocketAddress("127.0.0.1", port));
             serverReceiver = new Receiver(serverDispatcher);
-            gui.addEvent("The UF TYPE chat server is initialized on port " +
+
+            serverDispatcher.gui.addEvent("The UF TYPE chat server is initialized on port " +
                     port + ". It is ready for chatting!");
 
             serverReceiver.start();

@@ -1,48 +1,23 @@
 package com.uftype.messenger.gui;
 
-import com.uftype.messenger.client.Client;
+import com.uftype.messenger.common.Communication;
+import com.uftype.messenger.common.Dispatcher;
+import com.uftype.messenger.proto.ChatMessage;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.channels.SelectionKey;
 
-public class ClientGUI extends JFrame implements WindowListener, ActionListener {
-    public Client client;
-    public JTextArea chat;
-    public JButton login, logout, start;
-    private JLabel label;
-    private JTextField messages;
+public class ClientGUI extends GUI {
+    public JButton login, logout;
+    private boolean loggedIn;
 
-
-    public ClientGUI(Client client) {
-        super("UF TYPE Messenger Client");
-        this.client = client;
-
-        // Add the start and stop buttons
-        JPanel startPanel = new JPanel();
-        start = new JButton("Start");
-        start.addActionListener(this); // Will start the client
-        startPanel.add(start);
-        add(start, BorderLayout.NORTH);
-
-        // Add the chat room
-        JPanel chatPanel = new JPanel(new GridLayout(1,1));
-        chat = new JTextArea(80, 80);
-        chat.setEditable(false);
-        chat.append("Chat room.\n");
-        chat.setCaretPosition(chat.getText().length() - 1);
-        chatPanel.add(new JScrollPane(chat));
-        add(chatPanel);
-
-        // Add the file menu
-        JMenuBar menuBar = new JMenuBar();
-        JMenu menuFile = new JMenu("File");
-        JMenuItem menuItemExit = new JMenuItem("Exit");
-        menuFile.add(menuItemExit);
-        menuBar.add(menuFile);
-
-        // adds menu bar to the frame
-        setJMenuBar(menuBar);
+    public ClientGUI(Dispatcher clientDispatcher) {
+        super(clientDispatcher, "UF TYPE Messenger Client");
+        loggedIn = false;
 
         // Add login and logout button
         login = new JButton("Login");
@@ -54,97 +29,54 @@ public class ClientGUI extends JFrame implements WindowListener, ActionListener 
         JPanel buttonPanel = new JPanel();
         buttonPanel.add(login);
         buttonPanel.add(logout);
-        add(buttonPanel, BorderLayout.SOUTH);
+        add(buttonPanel, BorderLayout.NORTH);
 
-        // Add message text field
-        messages = new JTextField("");
-        label = new JLabel("Enter a chat message: ", SwingConstants.CENTER);
+        label.setText("Please enter a username: ");
 
-        JPanel northPanel = new JPanel(new GridLayout(2,1));
-        northPanel.add(label);
-        northPanel.add(messages);
-        add(northPanel, BorderLayout.NORTH);
-
-        messages.addActionListener(this);
-        addWindowListener(this);
-
-        // Size the frame.
-        //frame.pack();
-        setSize(1000,750);
-
-        // Set the frame icon to an image loaded from a file.
-        setIconImage(new ImageIcon("src/main/resources/type-icon.png").getImage());
-
-        // Show it.
-        setVisible(true);
-    }
-
-    @Override
-    public void windowOpened(WindowEvent e) {
-
-    }
-
-    @Override
-    public void windowClosing(WindowEvent e) {
-        int reply = JOptionPane.showConfirmDialog(ClientGUI.this,
-                "Are you sure you want to quit?",
-                "Exit",
-                JOptionPane.YES_NO_OPTION,
-                JOptionPane.QUESTION_MESSAGE);
-        if (reply == JOptionPane.YES_OPTION) {
-            // Stop client
-            dispose();
-            System.exit(0);
-        } else {
-            return;
-        }
+        loadScreen();
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         Object o = e.getSource();
 
-        if (o == login) {
+        if (!loggedIn) {
+            String username = messages.getText().trim();
+            if (username.equals("")) {
+                // Prompt user to enter username
+                JOptionPane.showMessageDialog(ClientGUI.this, "Please provide a username.");
+                return;
+            }
+
+            dispatcher.username = username;
+
+            // Can do login and authentication here
+
+            label.setText("Enter a chat message: ");
+            messages.setText("");
+
+            login.setEnabled(false);
+            logout.setEnabled(true);
+            loggedIn = true;
+        }
+        else if (o == logout && loggedIn) {
 
         }
-        else if (o == logout) {
+        else if (o == messages && !messages.getText().equals("") && loggedIn){
+            try {
+                // Get the associated key to attach message
+                SelectionKey key = dispatcher.channel.keyFor(dispatcher.selector);
+                // Build and attach message
+                ChatMessage.Message chatMessage = Communication.buildMessage(messages.getText(), dispatcher.username,
+                        key.channel(), ChatMessage.Message.ChatType.TEXT);
+                key.attach(ByteBuffer.wrap(chatMessage.toByteArray()));
+                dispatcher.doWrite(key);
 
+                addChat(dispatcher.username + ": " + messages.getText());
+                messages.setText(""); // Clear message
+            } catch (IOException err) {
+                err.printStackTrace();
+            }
         }
-        else if (o == messages){
-            // Need to send message
-
-            addChat(messages.getText());
-            messages.setText(""); // Clear message
-        }
-    }
-
-    public void addChat(String message) {
-        chat.append(message + "\n");
-        chat.setCaretPosition(chat.getText().length() - 1);
-    }
-
-    @Override
-    public void windowClosed(WindowEvent e) {
-
-    }
-
-    @Override
-    public void windowIconified(WindowEvent e) {
-
-    }
-
-    @Override
-    public void windowDeiconified(WindowEvent e) {
-
-    }
-
-    @Override
-    public void windowActivated(WindowEvent e) {
-
-    }
-
-    @Override
-    public void windowDeactivated(WindowEvent e) {
-
     }
 }

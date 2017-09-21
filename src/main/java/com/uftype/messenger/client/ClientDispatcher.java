@@ -24,12 +24,15 @@ import static java.nio.channels.SelectionKey.OP_READ;
  */
 public class ClientDispatcher extends Dispatcher {
     private ConcurrentLinkedQueue<ChatMessage.Message> messageQueue; // Queue of incoming messages to be processed
-    public ClientGUI gui;
 
-    public ClientDispatcher(InetSocketAddress address, String username, ClientGUI gui) throws IOException {
-        super(address, username);
+    public ClientDispatcher(InetSocketAddress address) throws IOException {
+        super(address);
         messageQueue = new ConcurrentLinkedQueue<ChatMessage.Message>();
-        this.gui = gui;
+
+        // Set up GUI
+        ClientGUI gui = new ClientGUI(this);
+        setGUI(gui);
+        // Username will be set by response in GUI
     }
 
     /**
@@ -57,7 +60,7 @@ public class ClientDispatcher extends Dispatcher {
      * Writes any messages to the server which are contained in the message queue.
      */
     @Override
-    protected void doWrite(SelectionKey handle) throws IOException {
+    public void doWrite(SelectionKey handle) throws IOException {
         SocketChannel socketChannel = (SocketChannel) handle.channel();
 
         /*while (!messageQueue.isEmpty()) {
@@ -85,10 +88,10 @@ public class ClientDispatcher extends Dispatcher {
             case LOGIN:
                 if (authenticateUser()) {
                     // Successfully logged in
-                    gui.addChat("You've successfully logged into the messenger. Chat away!");
+                    gui.addEvent("You've successfully logged into the messenger. Chat away!");
                 }
                 else {
-                    gui.addChat("You entered the wrong credentials. Please try again!");
+                    gui.addEvent("You entered the wrong credentials. Please try again!");
                 }
                 break;
             case LOGOUT:

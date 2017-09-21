@@ -1,6 +1,5 @@
 package com.uftype.messenger.common;
 
-import com.sun.org.apache.regexp.internal.RE;
 import com.uftype.messenger.proto.ChatMessage;
 
 import java.io.BufferedReader;

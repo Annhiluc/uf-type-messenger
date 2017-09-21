@@ -18,22 +18,19 @@ public class Client{
     private static Dispatcher clientDispatcher;
     private static Receiver clientReceiver;
 
-    public Client(String host, int port, String username) throws IOException {
-        connect(host, port, username);
+    public Client(String host, int port) throws IOException {
+        connect(host, port);
     }
 
     /**
      * Accept communications from the server. Pushes all information onto the screen.
      */
-    private void connect(String host, int port, String username) throws IOException {
+    private void connect(String host, int port) throws IOException {
         try {
-            // Set up GUI
-            ClientGUI gui = new ClientGUI(this);
-
-            clientDispatcher = new ClientDispatcher(new InetSocketAddress(host, port), username, gui);
+            clientDispatcher = new ClientDispatcher(new InetSocketAddress(host, port));
             clientReceiver = new Receiver(clientDispatcher);
 
-            gui.addChat("The UF TYPE chat client is initialized on " +
+            clientDispatcher.gui.addEvent("The UF TYPE chat client is initialized on " +
                     host + ":" + port + ". It is ready for chatting!");
 
             clientReceiver.start();
@@ -53,14 +50,7 @@ public class Client{
 
     public static void main(String[] args) {
         try {
-            Scanner in = new Scanner(System.in);
-
-            System.out.println("Please enter the username you'd like to use: ");
-            String username = in.nextLine();
-
-            // Need to do login/authentication here
-
-            Client client = new Client("127.0.0.1", 3000, username);
+            Client client = new Client("127.0.0.1", 3000);
         } catch (IOException e) {
         }
     }

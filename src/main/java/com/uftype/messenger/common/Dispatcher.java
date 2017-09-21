@@ -1,7 +1,7 @@
 package com.uftype.messenger.common;
 
+import com.uftype.messenger.gui.GUI;
 import com.uftype.messenger.proto.ChatMessage;
-import jdk.nashorn.internal.codegen.CompileUnit;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -19,21 +19,30 @@ import static java.nio.channels.SelectionKey.OP_WRITE;
  */
 public abstract class Dispatcher implements Runnable {
     protected ByteBuffer buffer; // Buffer for handling messages
-    protected Selector selector; // Selector to demultiplex incoming channels
-    protected SelectableChannel channel; // Current channel
     protected InetSocketAddress address; // IP address
     protected volatile boolean isUp; // True if running
-    protected String username;
+
+    public Selector selector; // Selector to demultiplex incoming channels
+    public SelectableChannel channel; // Current channel
+    public String username;
+    public GUI gui = null;
 
     protected final Logger LOGGER = Logger.getLogger(Dispatcher.class.getName());
 
-    public Dispatcher(InetSocketAddress address, String username) throws IOException{
+    public Dispatcher(InetSocketAddress address) throws IOException{
         this.address = address;
         this.buffer = ByteBuffer.allocate(16384);
         this.channel = getChannel(address);
         this.selector = getSelector();
         this.isUp = true;
-        this.username = username;
+    }
+
+    /**
+     * Set GUI object for the dispatcher
+     * @param gui
+     */
+    public void setGUI(GUI gui) {
+        this.gui = gui;
     }
 
     /**
@@ -49,7 +58,7 @@ public abstract class Dispatcher implements Runnable {
     /**
      * Writes any messages connected to the handle.
      */
-    protected abstract void doWrite(SelectionKey handle) throws IOException;
+    public abstract void doWrite(SelectionKey handle) throws IOException;
 
     /**
      * Handle data based on type of message.
@@ -67,7 +76,7 @@ public abstract class Dispatcher implements Runnable {
             }
             selector.close();
         } catch (ClosedSelectorException e) {
-            // Handled in run()
+            System.out.println("UF TYPE server closed connection.");
         } catch (IOException e) {
             LOGGER.log(Level.WARNING, "UF TYPE stop failure: " + e);
         }
@@ -99,7 +108,7 @@ public abstract class Dispatcher implements Runnable {
                     }
                 }
             } catch (ClosedSelectorException e) {
-                LOGGER.log(Level.INFO, "UF TYPE server closed connection.");
+                gui.addChat("UF TYPE server closed connection.");
             } catch (Exception e) {
                 LOGGER.log(Level.WARNING, "UF TYPE dispatcher failure: " + e);
                 stop();
@@ -147,7 +156,7 @@ public abstract class Dispatcher implements Runnable {
             try {
                 read = socketChannel.read(buffer);
             } catch (IOException e) {
-                System.out.println("Another connection has disconnected.");
+                gui.addEvent("Another connection has disconnected.");
                 handle.cancel();
                 socketChannel.close();
                 return;
