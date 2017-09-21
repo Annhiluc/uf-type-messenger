@@ -66,6 +66,8 @@ public abstract class Dispatcher implements Runnable {
                 handle.channel().close();
             }
             selector.close();
+        } catch (ClosedSelectorException e) {
+            // Handled in run()
         } catch (IOException e) {
             LOGGER.log(Level.WARNING, "UF TYPE stop failure: " + e);
         }
@@ -96,6 +98,8 @@ public abstract class Dispatcher implements Runnable {
                         doWrite(handle);
                     }
                 }
+            } catch (ClosedSelectorException e) {
+                LOGGER.log(Level.INFO, "UF TYPE server closed connection.");
             } catch (Exception e) {
                 LOGGER.log(Level.WARNING, "UF TYPE dispatcher failure: " + e);
                 stop();
@@ -161,12 +165,6 @@ public abstract class Dispatcher implements Runnable {
             ChatMessage.Message message = ChatMessage.Message.parseFrom(data);
 
             // Depending on the type of message, handle data
-            if (message.getType() == ChatMessage.Message.ChatType.TEXT) {
-                String formatted = message.getUsername() + ": " + message.getText();
-                System.out.println(formatted);
-            }
-            else {
-                handleData(message);
-            }
+            handleData(message);
     }
 }

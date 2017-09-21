@@ -5,11 +5,12 @@ import com.uftype.messenger.server.Server;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
 
 public class ServerGUI extends JFrame implements WindowListener, ActionListener {
-    Server server;
-    JTextArea chat, event;
-    JButton start;
+    public Server server;
+    public JTextArea chat, event;
+    public JButton start;
 
     public ServerGUI(Server server) {
         super("UF TYPE Messenger Server");
@@ -26,13 +27,11 @@ public class ServerGUI extends JFrame implements WindowListener, ActionListener 
         JPanel chatPanel = new JPanel(new GridLayout(2,1));
         chat = new JTextArea(80, 80);
         chat.setEditable(false);
-        chat.append("Chat room.\n");
-        chat.setCaretPosition(chat.getText().length() - 1);
+        addChat("Chat room.");
         chatPanel.add(new JScrollPane(chat));
         event = new JTextArea(80, 80);
         event.setEditable(false);
-        event.append("Events log.\n");
-        event.setCaretPosition(event.getText().length() - 1);
+        addEvent("Events log.");
         chatPanel.add(new JScrollPane(event));
         add(chatPanel);
 
@@ -60,11 +59,6 @@ public class ServerGUI extends JFrame implements WindowListener, ActionListener 
     }
 
     @Override
-    public void windowOpened(WindowEvent e) {
-
-    }
-
-    @Override
     public void windowClosing(WindowEvent e) {
         int reply = JOptionPane.showConfirmDialog(ServerGUI.this,
                 "Are you sure you want to quit?",
@@ -85,14 +79,33 @@ public class ServerGUI extends JFrame implements WindowListener, ActionListener 
     public void actionPerformed(ActionEvent e) {
         // Stop server if it is running
         if (start.getText().equals("Stop")) {
+            server.disconnect();
             server = null;
             start.setText("Start");
             return;
         }
         else {
-            // Start server here
-            start.setText("Stop");
+            //try {
+                start.setText("Stop");
+            //} catch (IOException err) {
+              //  err.printStackTrace();
+            //}
         }
+    }
+
+    public void addChat(String message) {
+        chat.append(message + "\n");
+        chat.setCaretPosition(chat.getText().length() - 1);
+    }
+
+    public void addEvent(String message) {
+        event.append(message + "\n");
+        event.setCaretPosition(event.getText().length() - 1);
+    }
+
+    @Override
+    public void windowOpened(WindowEvent e) {
+
     }
 
     @Override

@@ -27,13 +27,14 @@ public class Client{
      */
     private void connect(String host, int port, String username) throws IOException {
         try {
-            clientDispatcher = new ClientDispatcher(new InetSocketAddress(host, port), username);
-            clientReceiver = new Receiver(clientDispatcher);
-            LOGGER.log(Level.INFO, "The UF TYPE chat client is initialized on " +
-                    host + ":" + port + ". It is ready for chatting!");
-
             // Set up GUI
             ClientGUI gui = new ClientGUI(this);
+
+            clientDispatcher = new ClientDispatcher(new InetSocketAddress(host, port), username, gui);
+            clientReceiver = new Receiver(clientDispatcher);
+
+            gui.addChat("The UF TYPE chat client is initialized on " +
+                    host + ":" + port + ". It is ready for chatting!");
 
             clientReceiver.start();
             clientDispatcher.run();
@@ -64,6 +65,3 @@ public class Client{
         }
     }
 }
-
-
-

@@ -3,6 +3,7 @@ package com.uftype.messenger.client;
 import com.uftype.messenger.auth.Authentication;
 import com.uftype.messenger.common.Dispatcher;
 import com.uftype.messenger.common.UserContext;
+import com.uftype.messenger.gui.ClientGUI;
 import com.uftype.messenger.proto.ChatMessage;
 
 import java.io.IOException;
@@ -23,10 +24,12 @@ import static java.nio.channels.SelectionKey.OP_READ;
  */
 public class ClientDispatcher extends Dispatcher {
     private ConcurrentLinkedQueue<ChatMessage.Message> messageQueue; // Queue of incoming messages to be processed
+    public ClientGUI gui;
 
-    public ClientDispatcher(InetSocketAddress address, String username) throws IOException {
+    public ClientDispatcher(InetSocketAddress address, String username, ClientGUI gui) throws IOException {
         super(address, username);
         messageQueue = new ConcurrentLinkedQueue<ChatMessage.Message>();
+        this.gui = gui;
     }
 
     /**
@@ -75,29 +78,33 @@ public class ClientDispatcher extends Dispatcher {
     @Override
     protected void handleData (ChatMessage.Message message) {
         switch (message.getType()) {
+            case TEXT:
+                String formatted = message.getUsername() + ": " + message.getText();
+                gui.addChat(formatted);
+                break;
             case LOGIN:
                 if (authenticateUser()) {
                     // Successfully logged in
-                    System.out.println("You've successfully logged into the messenger. Chat away!");
+                    gui.addChat("You've successfully logged into the messenger. Chat away!");
                 }
                 else {
-                    System.out.println("You entered the wrong credentials. Please try again!");
+                    gui.addChat("You entered the wrong credentials. Please try again!");
                 }
                 break;
             case LOGOUT:
                 Authentication.logout(username);
-                System.out.println("Have a nice day!");
+                gui.addChat("Have a nice day!");
                 break;
             case NEWUSER:
                 if (registerUser()) {
                     // Successfully registered user
-                    System.out.println("You've successfully registered! Chat away!");
+                    gui.addChat("You've successfully registered! Chat away!");
                 }
                 else {
-                    System.out.println("Uh-oh! Registration failed, please try again!");
+                    gui.addChat("Uh-oh! Registration failed, please try again!");
                 }
             case CLOSE:
-                System.out.println("Another connection has disconnected.");
+                gui.addChat("Another connection has disconnected.");
                 break;
             default:
                 break;

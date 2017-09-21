@@ -27,13 +27,13 @@ public class Server {
      */
     private void connect(int port) throws IOException {
         try {
-            serverDispatcher = new ServerDispatcher(new InetSocketAddress("127.0.0.1", port));
-            serverReceiver = new Receiver(serverDispatcher);
-            LOGGER.log(Level.INFO, "The UF TYPE chat server is initialized on port " +
-                    port + ". It is ready for chatting!");
-
             // Set up ServerGUI
             ServerGUI gui = new ServerGUI(this);
+
+            serverDispatcher = new ServerDispatcher(new InetSocketAddress("127.0.0.1", port), gui);
+            serverReceiver = new Receiver(serverDispatcher);
+            gui.addEvent("The UF TYPE chat server is initialized on port " +
+                    port + ". It is ready for chatting!");
 
             serverReceiver.start();
             serverDispatcher.run();
@@ -45,7 +45,7 @@ public class Server {
     /**
      * Disconnect the server dispatcher.
      */
-    private void disconnect() {
+    public void disconnect() {
         serverReceiver = null;
         serverDispatcher.stop();
     }

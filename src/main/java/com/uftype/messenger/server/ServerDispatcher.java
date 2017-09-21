@@ -3,6 +3,7 @@ package com.uftype.messenger.server;
 
 import com.uftype.messenger.common.Communication;
 import com.uftype.messenger.common.Dispatcher;
+import com.uftype.messenger.gui.ServerGUI;
 import com.uftype.messenger.proto.ChatMessage;
 
 import java.io.IOException;
@@ -16,13 +17,15 @@ import static java.nio.channels.SelectionKey.OP_READ;
 
 public class ServerDispatcher extends Dispatcher {
     ChatMessage.Message.Builder welcome = ChatMessage.Message.newBuilder();
+    ServerGUI gui;
 
-    public ServerDispatcher(InetSocketAddress address) throws IOException {
+    public ServerDispatcher(InetSocketAddress address, ServerGUI gui) throws IOException {
         super(address, "UF TYPE Server");
         welcome.setText("Welcome to UF TYPE Messenger Chat!");
         welcome.setUsername(this.username);
         welcome.setSender(address.toString());
         welcome.setType(ChatMessage.Message.ChatType.TEXT);
+        this.gui = gui;
     }
 
     /**
@@ -64,7 +67,7 @@ public class ServerDispatcher extends Dispatcher {
                 // Build and send welcome message
                 welcome.setRecipient(socketChannel.socket().getLocalSocketAddress().toString());
                 socketChannel.write(ByteBuffer.wrap(welcome.build().toByteArray()));
-                System.out.println("Someone entered the chat room: " + address);
+                gui.addEvent("Someone entered the chat room: " + address);
             }
         } catch (IOException e) {
             LOGGER.log(Level.WARNING, "UF TYPE accept handler failure: " + e);
@@ -100,6 +103,10 @@ public class ServerDispatcher extends Dispatcher {
         SelectionKey key = channel.keyFor(selector);
 
         switch (message.getType()) {
+            case TEXT:
+                String formatted = message.getUsername() + ": " + message.getText();
+                gui.addChat(formatted);
+                break;
             case LOGIN:
                 // Mirror request to client side to handle
             case LOGOUT:
@@ -112,7 +119,7 @@ public class ServerDispatcher extends Dispatcher {
                 doWrite(key);
                 break;
             case CLOSE:
-                System.out.println("Another connection has disconnected.");
+                gui.addEvent("Another connection has disconnected.");
                 break;
             default:
                 break;

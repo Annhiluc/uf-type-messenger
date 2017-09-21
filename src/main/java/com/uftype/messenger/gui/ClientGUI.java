@@ -7,9 +7,12 @@ import java.awt.*;
 import java.awt.event.*;
 
 public class ClientGUI extends JFrame implements WindowListener, ActionListener {
-    Client client;
-    JTextArea chat;
-    JButton login, logout, start;
+    public Client client;
+    public JTextArea chat;
+    public JButton login, logout, start;
+    private JLabel label;
+    private JTextField messages;
+
 
     public ClientGUI(Client client) {
         super("UF TYPE Messenger Client");
@@ -18,7 +21,7 @@ public class ClientGUI extends JFrame implements WindowListener, ActionListener 
         // Add the start and stop buttons
         JPanel startPanel = new JPanel();
         start = new JButton("Start");
-        start.addActionListener(this); // Will start the server
+        start.addActionListener(this); // Will start the client
         startPanel.add(start);
         add(start, BorderLayout.NORTH);
 
@@ -53,6 +56,16 @@ public class ClientGUI extends JFrame implements WindowListener, ActionListener 
         buttonPanel.add(logout);
         add(buttonPanel, BorderLayout.SOUTH);
 
+        // Add message text field
+        messages = new JTextField("");
+        label = new JLabel("Enter a chat message: ", SwingConstants.CENTER);
+
+        JPanel northPanel = new JPanel(new GridLayout(2,1));
+        northPanel.add(label);
+        northPanel.add(messages);
+        add(northPanel, BorderLayout.NORTH);
+
+        messages.addActionListener(this);
         addWindowListener(this);
 
         // Size the frame.
@@ -97,9 +110,17 @@ public class ClientGUI extends JFrame implements WindowListener, ActionListener 
         else if (o == logout) {
 
         }
-        else {
+        else if (o == messages){
             // Need to send message
+
+            addChat(messages.getText());
+            messages.setText(""); // Clear message
         }
+    }
+
+    public void addChat(String message) {
+        chat.append(message + "\n");
+        chat.setCaretPosition(chat.getText().length() - 1);
     }
 
     @Override
