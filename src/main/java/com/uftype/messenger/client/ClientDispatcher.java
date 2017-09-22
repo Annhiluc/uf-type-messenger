@@ -6,6 +6,8 @@ import com.uftype.messenger.common.UserContext;
 import com.uftype.messenger.gui.ClientGUI;
 import com.uftype.messenger.proto.ChatMessage;
 
+import java.io.BufferedOutputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
@@ -85,6 +87,17 @@ public class ClientDispatcher extends Dispatcher {
                 String formatted = message.getUsername() + ": " + message.getText();
                 gui.addChat(formatted);
                 break;
+            case FILE:
+                try {
+                    // receive file
+                    BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream("Download.txt"));
+
+                    bos.write(message.getText().getBytes(), 0 , message.getTextBytes().size());
+                    bos.flush();
+                    gui.addEvent("File downloaded (" + message.getTextBytes().size() + " bytes read)");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             case LOGIN:
                 if (authenticateUser()) {
                     // Successfully logged in

@@ -111,6 +111,8 @@ public class ServerDispatcher extends Dispatcher {
                 String formatted = message.getUsername() + ": " + message.getText();
                 gui.addChat(formatted);
                 break;
+            case FILE:
+                // Mirror request to client side to handle
             case LOGIN:
                 // Mirror request to client side to handle
             case LOGOUT:

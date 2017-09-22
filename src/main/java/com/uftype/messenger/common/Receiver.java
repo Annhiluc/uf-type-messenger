@@ -12,6 +12,7 @@ import java.util.logging.Logger;
 
 /**
  * Represents the receiver which is employed by client and server to facilitate message sending and receiving.
+ * Is only used in console version of application.
  */
 public class Receiver extends Thread {
     protected Dispatcher dispatcher; // Dispatcher to connect channel and selectors
