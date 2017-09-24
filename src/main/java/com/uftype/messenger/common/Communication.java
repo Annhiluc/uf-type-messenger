@@ -1,5 +1,6 @@
 package com.uftype.messenger.common;
 
+import com.google.protobuf.ByteString;
 import com.uftype.messenger.proto.ChatMessage;
 
 import java.io.IOException;
@@ -15,11 +16,31 @@ public class Communication {
     /**
      * Build ChatMessage.Message as defined in ChatMessage.proto for communication.
      */
-    public static ChatMessage.Message buildMessage(String message, String username, SelectableChannel socketChannel,
-                                               ChatMessage.Message.ChatType chatType) throws IOException {
+    public static ChatMessage.Message buildMessage (String message, String username, SelectableChannel socketChannel,
+                                                   ChatMessage.Message.ChatType chatType) throws IOException {
         ChatMessage.Message.Builder messageBuilder = initializeMessage(socketChannel);
         messageBuilder.setUsername(username);
-        messageBuilder.setText(message);
+        if (message != null) {
+            messageBuilder.setText(message);
+        }
+        messageBuilder.setType(chatType);
+
+        return messageBuilder.build();
+    }
+
+    /**
+     * Build ChatMessage.Message as defined in ChatMessage.proto for communication.
+     */
+    public static ChatMessage.Message buildMessage (String message, byte[] file, String username, SelectableChannel socketChannel,
+                                                    ChatMessage.Message.ChatType chatType) throws IOException {
+        ChatMessage.Message.Builder messageBuilder = initializeMessage(socketChannel);
+        messageBuilder.setUsername(username);
+        if (message != null) {
+            messageBuilder.setText(message);
+        }
+        if (file != null) {
+            messageBuilder.setFile(ByteString.copyFrom(file));
+        }
         messageBuilder.setType(chatType);
 
         return messageBuilder.build();
@@ -29,7 +50,7 @@ public class Communication {
      * Sets up a message builder with the username, recipient, and sender of the message.
      * The text, type, and username of the message still need to be set.
      */
-    public static ChatMessage.Message.Builder initializeMessage(SelectableChannel socketChannel) throws IOException{
+    public static ChatMessage.Message.Builder initializeMessage (SelectableChannel socketChannel) throws IOException{
         ChatMessage.Message.Builder messageBuilder = ChatMessage.Message.newBuilder();
 
         SocketChannel channel;

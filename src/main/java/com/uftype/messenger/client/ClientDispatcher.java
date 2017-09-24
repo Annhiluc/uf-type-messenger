@@ -6,6 +6,7 @@ import com.uftype.messenger.common.UserContext;
 import com.uftype.messenger.gui.ClientGUI;
 import com.uftype.messenger.proto.ChatMessage;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -81,32 +82,8 @@ public class ClientDispatcher extends Dispatcher {
      * Handle data based on type of message.
      */
     @Override
-    protected void handleData (ChatMessage.Message message) {
+    public void handleData (ChatMessage.Message message) throws IOException {
         switch (message.getType()) {
-            case TEXT:
-                String formatted = message.getUsername() + ": " + message.getText();
-                gui.addChat(formatted);
-                break;
-            case FILE:
-                try {
-                    // receive file
-                    BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream("Download.txt"));
-
-                    bos.write(message.getText().getBytes(), 0 , message.getTextBytes().size());
-                    bos.flush();
-                    gui.addEvent("File downloaded (" + message.getTextBytes().size() + " bytes read)");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            case LOGIN:
-                if (authenticateUser()) {
-                    // Successfully logged in
-                    gui.addEvent("You've successfully logged into the messenger. Chat away!");
-                }
-                else {
-                    gui.addEvent("You entered the wrong credentials. Please try again!");
-                }
-                break;
             case LOGOUT:
                 Authentication.logout(username);
                 gui.addChat("Have a nice day!");
@@ -123,6 +100,7 @@ public class ClientDispatcher extends Dispatcher {
                 gui.addChat("Another connection has disconnected.");
                 break;
             default:
+                super.handleData(message);
                 break;
         }
     }

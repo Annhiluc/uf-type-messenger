@@ -3,6 +3,8 @@ package com.uftype.messenger.common;
 import com.uftype.messenger.gui.GUI;
 import com.uftype.messenger.proto.ChatMessage;
 
+import java.io.BufferedOutputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
@@ -59,11 +61,6 @@ public abstract class Dispatcher implements Runnable {
      * Writes any messages connected to the handle.
      */
     public abstract void doWrite(SelectionKey handle) throws IOException;
-
-    /**
-     * Handle data based on type of message.
-     */
-    protected abstract void handleData (ChatMessage.Message message) throws IOException;
 
     /**
      * Closes all channels which are currently held by selector.
@@ -175,5 +172,37 @@ public abstract class Dispatcher implements Runnable {
 
             // Depending on the type of message, handle data
             handleData(message);
+    }
+
+    /**
+     * Handle data based on type of message.
+     */
+    public void handleData (ChatMessage.Message message) throws IOException {
+        switch (message.getType()) {
+            case TEXT:
+                String formatted = message.getUsername() + ": " + message.getText();
+                gui.addChat(formatted);
+                break;
+            case FILE:
+                try {
+                    // Receive file
+                    byte[] mybytearray  = message.getFile().toByteArray();
+                    BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(message.getText()));
+                    bos.write(mybytearray, 0 , mybytearray.length);
+                    gui.addEvent("File downloaded (" + mybytearray.length + " bytes read)");
+
+                    // Close output stream
+                    bos.flush();
+                    bos.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                break;
+            case CLOSE:
+                gui.addChat("Another connection has disconnected.");
+                break;
+            default:
+                break;
+        }
     }
 }

@@ -7,12 +7,12 @@ import com.uftype.messenger.proto.ChatMessage;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.io.IOException;
+import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 
 public class ClientGUI extends GUI {
-    public JButton login, logout;
+    public JButton login, logout, file;
     private boolean loggedIn;
 
     public ClientGUI(Dispatcher clientDispatcher) {
@@ -24,11 +24,14 @@ public class ClientGUI extends GUI {
         login.addActionListener(this);
         logout = new JButton("Logout");
         logout.addActionListener(this);
+        file = new JButton("Add File");
+        file.addActionListener(this);
         logout.setEnabled(false);
 
         JPanel buttonPanel = new JPanel();
         buttonPanel.add(login);
         buttonPanel.add(logout);
+        buttonPanel.add(file);
         add(buttonPanel, BorderLayout.NORTH);
 
         label.setText("Please enter a username: ");
@@ -59,10 +62,10 @@ public class ClientGUI extends GUI {
             logout.setEnabled(true);
             loggedIn = true;
         }
-        else if (o == logout && loggedIn) {
+        else if (o == logout) {
 
         }
-        else if (o == messages && !messages.getText().equals("") && loggedIn){
+        else if (o == messages && !messages.getText().equals("")){
             try {
                 // Get the associated key to attach message
                 SelectionKey key = dispatcher.channel.keyFor(dispatcher.selector);
@@ -74,6 +77,27 @@ public class ClientGUI extends GUI {
 
                 addChat(dispatcher.username + ": " + messages.getText());
                 messages.setText(""); // Clear message
+            } catch (IOException err) {
+                err.printStackTrace();
+            }
+        }
+        else if (o == file) {
+            // Transfer file here
+            try {
+                String fileName = JOptionPane.showInputDialog("Please enter the name of the file: ");
+                // Send file
+                File myFile = new File (fileName);
+                byte [] mybytearray  = new byte [(int)myFile.length()];
+                BufferedInputStream bis = new BufferedInputStream(new FileInputStream(myFile));
+                bis.read(mybytearray, 0, mybytearray.length);
+
+                // Send file message
+                ChatMessage.Message fileRequest = Communication.buildMessage(fileName, mybytearray,
+                        dispatcher.username, dispatcher.channel, ChatMessage.Message.ChatType.FILE);
+                dispatcher.handleData(fileRequest);
+
+                // Close input stream
+                bis.close();
             } catch (IOException err) {
                 err.printStackTrace();
             }

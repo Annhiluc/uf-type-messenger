@@ -102,15 +102,11 @@ public class ServerDispatcher extends Dispatcher {
      * Handle data based on type of message.
      */
     @Override
-    protected void handleData (ChatMessage.Message message) throws IOException {
+    public void handleData (ChatMessage.Message message) throws IOException {
         // Get the associated key to attach message
         SelectionKey key = channel.keyFor(selector);
 
         switch (message.getType()) {
-            case TEXT:
-                String formatted = message.getUsername() + ": " + message.getText();
-                gui.addChat(formatted);
-                break;
             case FILE:
                 // Mirror request to client side to handle
             case LOGIN:
@@ -124,10 +120,8 @@ public class ServerDispatcher extends Dispatcher {
                 key.attach(ByteBuffer.wrap(request.toByteArray()));
                 doWrite(key);
                 break;
-            case CLOSE:
-                gui.addEvent("Another connection has disconnected.");
-                break;
             default:
+                super.handleData(message);
                 break;
         }
     }
