@@ -107,8 +107,6 @@ public class ServerDispatcher extends Dispatcher {
         SelectionKey key = channel.keyFor(selector);
 
         switch (message.getType()) {
-            case FILE:
-                // Mirror request to client side to handle
             case LOGIN:
                 // Mirror request to client side to handle
             case LOGOUT:

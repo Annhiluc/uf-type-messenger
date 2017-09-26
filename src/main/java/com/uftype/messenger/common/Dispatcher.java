@@ -33,7 +33,7 @@ public abstract class Dispatcher implements Runnable {
 
     public Dispatcher(InetSocketAddress address) throws IOException{
         this.address = address;
-        this.buffer = ByteBuffer.allocate(16384);
+        this.buffer = ByteBuffer.allocate(1048567);
         this.channel = getChannel(address);
         this.selector = getSelector();
         this.isUp = true;
@@ -73,7 +73,7 @@ public abstract class Dispatcher implements Runnable {
             }
             selector.close();
         } catch (ClosedSelectorException e) {
-            System.out.println("UF TYPE server closed connection.");
+            LOGGER.log(Level.WARNING, "UF TYPE server closed connection.");
         } catch (IOException e) {
             LOGGER.log(Level.WARNING, "UF TYPE stop failure: " + e);
         }
@@ -168,6 +168,8 @@ public abstract class Dispatcher implements Runnable {
             byte[] data = new byte[buffer.position()];
             arraycopy(buffer.array(), 0, data, 0, buffer.position());
 
+            System.out.println(data.length);
+
             ChatMessage.Message message = ChatMessage.Message.parseFrom(data);
 
             // Depending on the type of message, handle data
@@ -193,7 +195,7 @@ public abstract class Dispatcher implements Runnable {
 
                     // Close output stream
                     bos.flush();
-                    bos.close();
+                    //bos.close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

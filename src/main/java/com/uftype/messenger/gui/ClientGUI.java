@@ -14,6 +14,8 @@ import java.nio.channels.SelectionKey;
 public class ClientGUI extends GUI {
     public JButton login, logout, file;
     private boolean loggedIn;
+    //Create a file chooser
+    final JFileChooser fc = new JFileChooser();
 
     public ClientGUI(Dispatcher clientDispatcher) {
         super(clientDispatcher, "UF TYPE Messenger Client");
@@ -84,20 +86,37 @@ public class ClientGUI extends GUI {
         else if (o == file) {
             // Transfer file here
             try {
-                String fileName = JOptionPane.showInputDialog("Please enter the name of the file: ");
-                // Send file
-                File myFile = new File (fileName);
-                byte [] mybytearray  = new byte [(int)myFile.length()];
-                BufferedInputStream bis = new BufferedInputStream(new FileInputStream(myFile));
-                bis.read(mybytearray, 0, mybytearray.length);
+                //In response to a button click:
+                int returnVal = fc.showOpenDialog(ClientGUI.this);
 
-                // Send file message
-                ChatMessage.Message fileRequest = Communication.buildMessage(fileName, mybytearray,
-                        dispatcher.username, dispatcher.channel, ChatMessage.Message.ChatType.FILE);
-                dispatcher.handleData(fileRequest);
+                if (returnVal == JFileChooser.APPROVE_OPTION) {
+                    // Send file
+                    File myFile = fc.getSelectedFile();
+                    byte [] mybytearray  = new byte [(int)myFile.length()];
+                    BufferedInputStream bis = new BufferedInputStream(new FileInputStream(myFile));
+                    bis.read(mybytearray, 0, mybytearray.length);
 
-                // Close input stream
-                bis.close();
+                    SelectionKey key = dispatcher.channel.keyFor(dispatcher.selector);
+
+                    // Handle files which are > 14000 bits
+                    if (myFile.length() > 14000) {
+                        addEvent("Please send files that are less than 14KB.");
+                        return;
+                    }
+
+                    // Send file message
+                    ChatMessage.Message fileRequest = Communication.buildMessage(myFile.getName(), mybytearray,
+                            dispatcher.username, key.channel(), ChatMessage.Message.ChatType.FILE);
+
+                    // Write message here
+                    key.attach(ByteBuffer.wrap(fileRequest.toByteArray()));
+                    dispatcher.doWrite(key);
+
+                    // Close input stream
+                    bis.close();
+                } else if (returnVal != JFileChooser.CANCEL_OPTION) {
+                    addEvent("Unable to choose that file. Please try again.");
+                }
             } catch (IOException err) {
                 err.printStackTrace();
             }
