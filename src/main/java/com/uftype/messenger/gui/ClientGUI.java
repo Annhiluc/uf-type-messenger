@@ -12,59 +12,40 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 
 public class ClientGUI extends GUI {
-    public JButton login, logout, file;
-    private boolean loggedIn;
+    public JButton logout, file;
+    protected Login login;
     //Create a file chooser
     final JFileChooser fc = new JFileChooser();
 
     public ClientGUI(Dispatcher clientDispatcher) {
         super(clientDispatcher, "UF TYPE Messenger Client");
-        loggedIn = false;
 
         // Add login and logout button
-        login = new JButton("Login");
-        login.addActionListener(this);
         logout = new JButton("Logout");
         logout.addActionListener(this);
         file = new JButton("Add File");
         file.addActionListener(this);
-        logout.setEnabled(false);
+        logout.setEnabled(true);
+        file.setEnabled(true);
 
         JPanel buttonPanel = new JPanel();
-        buttonPanel.add(login);
         buttonPanel.add(logout);
         buttonPanel.add(file);
         add(buttonPanel, BorderLayout.NORTH);
 
-        label.setText("Please enter a username: ");
-
-        loadScreen();
+        // Make a login/register opening frame, and when it successfully authenticates, load frame
+        login = new Login(this);
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         Object o = e.getSource();
 
-        if (!loggedIn) {
-            String username = messages.getText().trim();
-            if (username.equals("")) {
-                // Prompt user to enter username
-                JOptionPane.showMessageDialog(ClientGUI.this, "Please provide a username.");
-                return;
-            }
+        if (o == logout) {
+            // Do logout procedures
 
-            dispatcher.username = username;
-
-            // Can do login and authentication here
-
-            label.setText("Enter a chat message: ");
-            messages.setText("");
-
-            login.setEnabled(false);
-            logout.setEnabled(true);
-            loggedIn = true;
-        }
-        else if (o == logout) {
+            logout.setEnabled(false);
+            file.setEnabled(false);
 
         }
         else if (o == messages && !messages.getText().equals("")){
@@ -121,5 +102,11 @@ public class ClientGUI extends GUI {
                 err.printStackTrace();
             }
         }
+    }
+
+    @Override
+    public void windowOpened(WindowEvent e) {
+        // Set the username since the user is logged in
+        dispatcher.username = login.loggedInUser.username;
     }
 }

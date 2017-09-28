@@ -43,8 +43,6 @@ public class Authentication {
             String securePassword = hashMD5(password, salt); // This secure password wil be stored in the database
 
             isRegistered = database.register(firstname, lastname, username, email, securePassword, salt);
-
-            database.disconnect();
             return true;
         }
 
@@ -58,8 +56,6 @@ public class Authentication {
         UserContext isAuthenticated = null;
         if (database.connect()) {
             isAuthenticated = database.validate(username, password);
-
-            database.disconnect();
         }
 
         return isAuthenticated;

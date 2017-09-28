@@ -94,10 +94,6 @@ public abstract class GUI extends JFrame implements WindowListener, ActionListen
         event.setCaretPosition(event.getText().length() - 1);
     }
 
-    public void setUsername() {
-        label.setText("Please enter a username: ");
-    }
-
     @Override
     public void windowOpened(WindowEvent e) {
 

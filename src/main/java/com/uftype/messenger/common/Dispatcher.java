@@ -168,8 +168,6 @@ public abstract class Dispatcher implements Runnable {
             byte[] data = new byte[buffer.position()];
             arraycopy(buffer.array(), 0, data, 0, buffer.position());
 
-            System.out.println(data.length);
-
             ChatMessage.Message message = ChatMessage.Message.parseFrom(data);
 
             // Depending on the type of message, handle data

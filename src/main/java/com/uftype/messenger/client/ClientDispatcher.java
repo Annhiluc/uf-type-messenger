@@ -105,6 +105,10 @@ public class ClientDispatcher extends Dispatcher {
         }
     }
 
+    /**
+     * This will be used in a command-line case.
+     * @return
+     */
     private boolean authenticateUser() {
         Scanner in = new Scanner(System.in);
         System.out.println("Please enter your username: ");
@@ -124,6 +128,10 @@ public class ClientDispatcher extends Dispatcher {
         return true;
     }
 
+    /**
+     * This will be used in a command-line case.
+     * @return
+     */
     private boolean registerUser() {
         Scanner in = new Scanner(System.in);
         System.out.println("Please enter your first name: ");
