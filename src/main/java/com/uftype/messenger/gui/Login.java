@@ -29,8 +29,8 @@ public class Login extends JFrame implements ActionListener, WindowListener {
         JLabel label = new JLabel(ii);
         JLabel welcome = new JLabel("Welcome to the UF TYPE Messenger!");
         welcome.setHorizontalAlignment(0);
-        title.add(welcome);
         title.add(label);
+        title.add(welcome);
         add(title, BorderLayout.NORTH);
 
         loginPanel = new JPanel(new GridLayout(2,1));

@@ -3,6 +3,8 @@ package com.uftype.messenger.gui;
 import com.uftype.messenger.common.Dispatcher;
 
 import javax.swing.*;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.StyledDocument;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
@@ -10,10 +12,11 @@ import java.awt.event.WindowListener;
 
 public abstract class GUI extends JFrame implements WindowListener, ActionListener {
     protected Dispatcher dispatcher;
-    protected JTextArea chat, event;
     protected JPanel chatPanel, messagePanel;
     protected JLabel label;
+    protected StyledDocument chatText, eventText;
     public JTextField messages;
+    public JTextPane chat, event;
 
     public GUI (Dispatcher dispatcher, String name) {
         super(name);
@@ -21,16 +24,16 @@ public abstract class GUI extends JFrame implements WindowListener, ActionListen
 
         // Add the chat room
         chatPanel = new JPanel(new GridLayout(2,1));
-        chat = new JTextArea(80, 80);
-        chat.setEditable(false);
-        addChat("Chat room.");
+        chat = new JTextPane();
         chatPanel.add(new JScrollPane(chat));
+        chatText = chat.getStyledDocument();
+        addChat("Chat room.");
 
         // Add the chat room
-        event = new JTextArea(80, 80);
-        event.setEditable(false);
-        addEvent("Events log.");
+        event = new JTextPane();
         chatPanel.add(new JScrollPane(event));
+        eventText = event.getStyledDocument();
+        addEvent("Events log.");
         add(chatPanel, BorderLayout.CENTER);
 
         // Add the file menu
@@ -85,13 +88,19 @@ public abstract class GUI extends JFrame implements WindowListener, ActionListen
     }
 
     public void addChat(String message) {
-        chat.append(message + "\n");
-        chat.setCaretPosition(chat.getText().length() - 1);
+        try {
+            chatText.insertString(chatText.getLength(),message + "\n", null);
+        } catch (BadLocationException e) {
+            e.printStackTrace();
+        }
     }
 
     public void addEvent(String message) {
-        event.append(message + "\n");
-        event.setCaretPosition(event.getText().length() - 1);
+        try {
+            eventText.insertString(eventText.getLength(),message + "\n", null);
+        } catch (BadLocationException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

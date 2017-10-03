@@ -93,6 +93,13 @@ public class ClientGUI extends GUI {
                     key.attach(ByteBuffer.wrap(fileRequest.toByteArray()));
                     dispatcher.doWrite(key);
 
+                    // If image, put it in the chat message
+                    if (myFile.getName().endsWith("jpg") || myFile.getName().endsWith("png")) {
+                        addEvent(dispatcher.username + ": ");
+                        event.insertIcon(new ImageIcon(myFile.getAbsolutePath()));
+                        addEvent("\n"); // Makes it on a new line
+                    }
+
                     // Close input stream
                     bis.close();
                 } else if (returnVal != JFileChooser.CANCEL_OPTION) {

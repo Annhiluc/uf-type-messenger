@@ -3,6 +3,7 @@ package com.uftype.messenger.common;
 import com.uftype.messenger.gui.GUI;
 import com.uftype.messenger.proto.ChatMessage;
 
+import javax.swing.*;
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -189,6 +190,13 @@ public abstract class Dispatcher implements Runnable {
                     byte[] mybytearray  = message.getFile().toByteArray();
                     BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(message.getText()));
                     bos.write(mybytearray, 0 , mybytearray.length);
+
+                    // If image, put it in the chat message
+                    if (message.getText().endsWith("jpg") || message.getText().endsWith("png")) {
+                        gui.addEvent(username + " sent image: ");
+                        gui.event.insertIcon(new ImageIcon(message.getText()));
+                        gui.addChat("\n"); // Makes it on a new line
+                    }
                     gui.addEvent("File downloaded (" + mybytearray.length + " bytes read)");
 
                     // Close output stream
