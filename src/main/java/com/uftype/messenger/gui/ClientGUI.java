@@ -3,8 +3,12 @@ package com.uftype.messenger.gui;
 import com.uftype.messenger.common.Communication;
 import com.uftype.messenger.common.Dispatcher;
 import com.uftype.messenger.proto.ChatMessage;
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
+import org.fife.ui.rtextarea.RTextScrollPane;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
@@ -12,8 +16,9 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 
 public class ClientGUI extends GUI {
-    public JButton logout, file;
+    public JButton logout, file, code;
     protected Login login;
+    protected RSyntaxTextArea textArea;
     //Create a file chooser
     final JFileChooser fc = new JFileChooser();
 
@@ -32,6 +37,24 @@ public class ClientGUI extends GUI {
         buttonPanel.add(logout);
         buttonPanel.add(file);
         add(buttonPanel, BorderLayout.NORTH);
+
+        JPanel screen = new JPanel(new GridLayout(1,2));
+
+
+        textArea = new RSyntaxTextArea();
+        JPanel cp = new JPanel(new GridLayout(2, 1));
+        textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JAVASCRIPT);
+        textArea.setCodeFoldingEnabled(true);
+        RTextScrollPane sp = new RTextScrollPane(textArea);
+        cp.add(sp);
+
+        code = new JButton("Send Code");
+        code.addActionListener(this);
+        cp.add(code);
+
+        screen.add(chatPanel, BorderLayout.WEST);
+        screen.add(cp, BorderLayout.EAST);
+        add(screen, BorderLayout.CENTER);
 
         // Make a login/register opening frame, and when it successfully authenticates, load frame
         login = new Login(this);
@@ -60,6 +83,22 @@ public class ClientGUI extends GUI {
 
                 addChat(dispatcher.username + ": " + messages.getText());
                 messages.setText(""); // Clear message
+            } catch (IOException err) {
+                err.printStackTrace();
+            }
+        }
+        else if (o == code && !textArea.getText().equals("")) {
+            try {
+                // Get the associated key to attach message
+                SelectionKey key = dispatcher.channel.keyFor(dispatcher.selector);
+                // Build and attach message
+                ChatMessage.Message chatMessage = Communication.buildMessage(textArea.getText(), dispatcher.username,
+                        key.channel(), ChatMessage.Message.ChatType.CODE);
+                key.attach(ByteBuffer.wrap(chatMessage.toByteArray()));
+                dispatcher.doWrite(key);
+
+                addEvent(dispatcher.username + ": sent code snippet");
+                textArea.setText(""); // Clear message
             } catch (IOException err) {
                 err.printStackTrace();
             }

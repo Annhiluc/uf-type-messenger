@@ -23,7 +23,7 @@ public abstract class GUI extends JFrame implements WindowListener, ActionListen
         this.dispatcher = dispatcher;
 
         // Add the chat room
-        chatPanel = new JPanel(new GridLayout(2,1));
+        chatPanel = new JPanel(new GridLayout(3,1));
         chat = new JTextPane();
         chatPanel.add(new JScrollPane(chat));
         chatText = chat.getStyledDocument();
@@ -52,7 +52,7 @@ public abstract class GUI extends JFrame implements WindowListener, ActionListen
         messagePanel = new JPanel(new GridLayout(2,1));
         messagePanel.add(label);
         messagePanel.add(messages);
-        add(messagePanel, BorderLayout.SOUTH);
+        chatPanel.add(messagePanel);
 
         messages.addActionListener(this);
         addWindowListener(this);

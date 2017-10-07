@@ -1,5 +1,7 @@
 package com.uftype.messenger.common;
 
+import com.uftype.messenger.gui.ClientGUI;
+import com.uftype.messenger.gui.CodeGUI;
 import com.uftype.messenger.gui.GUI;
 import com.uftype.messenger.proto.ChatMessage;
 
@@ -205,6 +207,11 @@ public abstract class Dispatcher implements Runnable {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+                break;
+            case CODE:
+                CodeGUI code = new CodeGUI(message.getUsername(), message.getText());
+                formatted = message.getUsername() + ": sent code\n" + message.getText();
+                gui.addEvent(formatted);
                 break;
             case CLOSE:
                 gui.addChat("Another connection has disconnected.");

@@ -6,66 +6,25 @@ import org.fife.ui.rtextarea.RTextScrollPane;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 
-public class CodeGUI extends JFrame implements WindowListener {
+public class CodeGUI extends JFrame {
 
-    RSyntaxTextArea textArea = new RSyntaxTextArea(20, 60);
-
-    public CodeGUI() {
-        super("UF TYPE: Code Text Editor");
-
+    public CodeGUI(String sender, String code) {
+        super("Code from " + sender);
         JPanel cp = new JPanel(new BorderLayout());
-        textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JAVASCRIPT);
+
+        RSyntaxTextArea textArea = new RSyntaxTextArea(20, 60);
+        textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JAVA);
         textArea.setCodeFoldingEnabled(true);
+        textArea.setText(code);
         RTextScrollPane sp = new RTextScrollPane(textArea);
         cp.add(sp);
 
         setContentPane(cp);
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         pack();
         setLocationRelativeTo(null);
 
         setVisible(true);
-    }
-
-    public static void main(String[] args) {
-        CodeGUI code = new CodeGUI();
-    }
-
-    @Override
-    public void windowClosing(WindowEvent e) {
-        // Send this to the other person
-    }
-
-    @Override
-    public void windowOpened(WindowEvent e) {
-
-    }
-
-    @Override
-    public void windowClosed(WindowEvent e) {
-
-    }
-
-    @Override
-    public void windowIconified(WindowEvent e) {
-
-    }
-
-    @Override
-    public void windowDeiconified(WindowEvent e) {
-
-    }
-
-    @Override
-    public void windowActivated(WindowEvent e) {
-
-    }
-
-    @Override
-    public void windowDeactivated(WindowEvent e) {
-
     }
 }
