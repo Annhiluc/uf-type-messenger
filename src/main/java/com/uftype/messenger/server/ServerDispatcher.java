@@ -71,7 +71,6 @@ public class ServerDispatcher extends Dispatcher {
                 // Build and send welcome message
                 welcome.setRecipient(socketChannel.socket().getLocalSocketAddress().toString());
                 socketChannel.write(ByteBuffer.wrap(welcome.build().toByteArray()));
-                gui.addEvent("Someone entered the chat room: " + address);
             }
         } catch (IOException e) {
             LOGGER.log(Level.WARNING, "UF TYPE accept handler failure: " + e);
@@ -109,15 +108,23 @@ public class ServerDispatcher extends Dispatcher {
         switch (message.getType()) {
             case LOGIN:
                 // Mirror request to client side to handle
-            case LOGOUT:
-                // Mirror request to client side to handle
             case NEWUSER:
-                // Mirror request to client side to handle
-                ChatMessage.Message request = Communication.buildMessage("", username,
-                        key.channel(), message.getType());
-                key.attach(ByteBuffer.wrap(request.toByteArray()));
+                // Update username
+                this.connectedHosts.put(message.getSender(), message.getUsername());
+                ChatMessage.Message chatMessage = Communication.buildMessage(Communication.getString(this.connectedHosts), username,
+                        key.channel(), ChatMessage.Message.ChatType.WHOISIN);
+                key.attach(ByteBuffer.wrap(chatMessage.toByteArray()));
                 doWrite(key);
+                gui.addEvent("Someone entered the chat room: " + address);
                 break;
+            case LOGOUT:
+                // Need to handle here to remove from connected hosts and update
+                this.connectedHosts.remove(message.getSender());
+                // Build and attach message
+                chatMessage = Communication.buildMessage(Communication.getString(this.connectedHosts), username,
+                        key.channel(), ChatMessage.Message.ChatType.WHOISIN);
+                key.attach(ByteBuffer.wrap(chatMessage.toByteArray()));
+                doWrite(key);
             default:
                 super.handleData(message);
                 break;

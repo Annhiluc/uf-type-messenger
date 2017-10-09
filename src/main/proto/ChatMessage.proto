@@ -19,5 +19,6 @@ message Message {
         FILE = 5;
         CODE = 6;
         CLOSE = 7;
+        WHOISIN = 8;
     }
 }

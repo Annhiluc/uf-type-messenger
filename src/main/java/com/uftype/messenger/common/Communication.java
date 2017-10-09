@@ -8,6 +8,8 @@ import java.net.Socket;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Represents methods to help build messages to send between clients and servers.
@@ -76,5 +78,19 @@ public class Communication {
         messageBuilder.setRecipient(remoteAddress);
 
         return messageBuilder;
+    }
+
+    /**
+     * Returns a string representation of a vector of Strings.
+     * @return
+     */
+    public static String getString(ConcurrentHashMap<String, String> hosts) {
+        StringBuilder sb = new StringBuilder();
+
+        for (String host : hosts.keySet()) {
+            sb.append(host + "\t" + hosts.get(host) + "\n");
+        }
+
+        return sb.toString();
     }
 }

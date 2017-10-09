@@ -1,5 +1,6 @@
 package com.uftype.messenger.gui;
 
+import com.uftype.messenger.auth.Authentication;
 import com.uftype.messenger.common.Communication;
 import com.uftype.messenger.common.Dispatcher;
 import com.uftype.messenger.proto.ChatMessage;
@@ -8,22 +9,27 @@ import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rtextarea.RTextScrollPane;
 
 import javax.swing.*;
-import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ClientGUI extends GUI {
-    public JButton logout, file, code, user;
+    public JButton logout, file, code;
     protected Login login;
     protected RSyntaxTextArea textArea;
+    protected ConcurrentHashMap<JButton, String> users;
+    protected JPanel otherUsers, screen;
+
     //Create a file chooser
     final JFileChooser fc = new JFileChooser();
 
     public ClientGUI(Dispatcher clientDispatcher) {
         super(clientDispatcher, "UF TYPE Messenger Client");
+
+        users = new ConcurrentHashMap<JButton, String>();
 
         // Add login and logout button
         logout = new JButton("Logout");
@@ -38,7 +44,7 @@ public class ClientGUI extends GUI {
         buttonPanel.add(file);
         add(buttonPanel, BorderLayout.NORTH);
 
-        JPanel screen = new JPanel(new GridLayout(1,3));
+        screen = new JPanel(new GridLayout(1,3));
 
         textArea = new RSyntaxTextArea();
         JPanel cp = new JPanel(new GridLayout(2, 1));
@@ -51,10 +57,7 @@ public class ClientGUI extends GUI {
         code.addActionListener(this);
         cp.add(code);
 
-        JPanel otherUsers = new JPanel(new GridLayout(1, 1));
-        user = new JButton("User"); // Need to populate with currently logged in users
-        user.addActionListener(this); // To create a chat window with that one user
-        otherUsers.add(new JScrollPane(otherUsers));
+        this.otherUsers = new JPanel();
 
         screen.add(chatPanel, BorderLayout.WEST);
         screen.add(cp, BorderLayout.CENTER);
@@ -74,7 +77,18 @@ public class ClientGUI extends GUI {
 
             logout.setEnabled(false);
             file.setEnabled(false);
-
+            if (Authentication.logout(dispatcher.username)) {
+                dispatcher.stop();
+                dispose();
+                System.exit(0);
+            }
+            else {
+                // Something failed, quit application
+                System.out.println("Error logging out of the application.");
+                dispatcher.stop();
+                dispose();
+                System.exit(1);
+            }
         }
         else if (o == messages && !messages.getText().equals("")){
             try {
@@ -153,6 +167,28 @@ public class ClientGUI extends GUI {
                 err.printStackTrace();
             }
         }
+        else if (users.containsKey(o)) {
+            // Need to send specific message
+        }
+    }
+
+    @Override
+    public void updateUsers(ConcurrentHashMap<String, String> hosts) {
+        screen.remove(this.otherUsers);
+
+        JPanel otherUsers = new JPanel(new GridLayout(hosts.size(), 1));
+        ConcurrentHashMap<JButton, String> newUsers = new ConcurrentHashMap<JButton, String>();
+        for (String host : hosts.keySet()) {
+            JButton user = new JButton(dispatcher.connectedHosts.get(host)); // Need to populate with currently logged in users
+            user.addActionListener(this); // To create a chat window with that one user
+            otherUsers.add(user);
+            newUsers.put(user, host);
+            users = newUsers;
+        }
+
+        this.otherUsers = otherUsers;
+
+        screen.add(otherUsers, BorderLayout.EAST);
     }
 
     @Override

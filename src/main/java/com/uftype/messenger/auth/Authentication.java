@@ -30,7 +30,7 @@ public class Authentication {
      * Returns true if logout is successful using provided credentials, false otherwise.
      */
     public static boolean logout(String username) {
-        return false;
+        return true;
     }
 
     /**

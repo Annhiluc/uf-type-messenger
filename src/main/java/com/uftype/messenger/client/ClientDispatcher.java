@@ -17,6 +17,8 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.Scanner;
+import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static java.nio.channels.SelectionKey.OP_CONNECT;
@@ -96,8 +98,18 @@ public class ClientDispatcher extends Dispatcher {
                 else {
                     gui.addChat("Uh-oh! Registration failed, please try again!");
                 }
-            case CLOSE:
-                gui.addChat("Another connection has disconnected.");
+            case WHOISIN:
+                String[] hosts = message.getText().trim().split("\n");
+                ConcurrentHashMap<String, String> newHosts = new ConcurrentHashMap<String, String>();
+
+                for (String host : hosts) {
+                    String[] mapping = host.split("\t");
+                    newHosts.put(mapping[0], mapping[1]); // Where 0 is the host, and 1 is the username
+                }
+
+                this.connectedHosts = newHosts;
+                // Tell gui to update
+                gui.updateUsers(newHosts);
                 break;
             default:
                 super.handleData(message);

@@ -1,6 +1,5 @@
 package com.uftype.messenger.common;
 
-import com.uftype.messenger.gui.ClientGUI;
 import com.uftype.messenger.gui.CodeGUI;
 import com.uftype.messenger.gui.GUI;
 import com.uftype.messenger.proto.ChatMessage;
@@ -13,6 +12,7 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.*;
 import java.util.Iterator;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -32,6 +32,8 @@ public abstract class Dispatcher implements Runnable {
     public String username;
     public GUI gui = null;
 
+    public ConcurrentHashMap<String, String> connectedHosts; // Maps host names to usernames
+
     protected final Logger LOGGER = Logger.getLogger(Dispatcher.class.getName());
 
     public Dispatcher(InetSocketAddress address) throws IOException{
@@ -39,6 +41,7 @@ public abstract class Dispatcher implements Runnable {
         this.buffer = ByteBuffer.allocate(1048567);
         this.channel = getChannel(address);
         this.selector = getSelector();
+        this.connectedHosts = new ConcurrentHashMap<String, String>();
         this.isUp = true;
     }
 
@@ -136,6 +139,18 @@ public abstract class Dispatcher implements Runnable {
                 socketChannel.finishConnect();
                 socketChannel.configureBlocking(false);
                 socketChannel.register(selector, OP_WRITE);
+
+                SelectionKey key = channel.keyFor(selector);
+
+                while (username == null || username.equals("")) {
+                    // Waiting loop
+                }
+
+                // Build and attach message with username
+                ChatMessage.Message chatMessage = Communication.buildMessage("", username,
+                        key.channel(), ChatMessage.Message.ChatType.NEWUSER);
+                key.attach(ByteBuffer.wrap(chatMessage.toByteArray()));
+                doWrite(key);
             }
         } catch (IOException e) {
             LOGGER.log(Level.WARNING, "UF TYPE connect handler failure: " + e);
@@ -215,6 +230,8 @@ public abstract class Dispatcher implements Runnable {
                 break;
             case CLOSE:
                 gui.addChat("Another connection has disconnected.");
+
+                // Actually, should send message to the connection
                 break;
             default:
                 break;

@@ -10,6 +10,7 @@ import java.awt.event.*;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ServerGUI extends GUI {
     public JButton start;
@@ -19,7 +20,7 @@ public class ServerGUI extends GUI {
 
         // Add the start and stop buttons
         JPanel startPanel = new JPanel();
-        start = new JButton("Start");
+        start = new JButton("Stop");
         start.addActionListener(this); // Will start the server
         startPanel.add(start);
         add(start, BorderLayout.NORTH);
@@ -34,12 +35,9 @@ public class ServerGUI extends GUI {
         if (o == start) {
             if (start.getText().equals("Stop")) {
                 dispatcher.stop();
-                start.setText("Start");
+                dispose();
+                System.exit(0);
                 return;
-            }
-            else {
-                // Start dispatcher
-                start.setText("Stop");
             }
         }
         else if (o == messages && !messages.getText().equals("")){
@@ -58,5 +56,10 @@ public class ServerGUI extends GUI {
                 err.printStackTrace();
             }
         }
+    }
+
+    @Override
+    public void updateUsers(ConcurrentHashMap<String, String> users) {
+
     }
 }

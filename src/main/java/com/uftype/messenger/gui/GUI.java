@@ -9,6 +9,7 @@ import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class GUI extends JFrame implements WindowListener, ActionListener {
     protected Dispatcher dispatcher;
@@ -102,6 +103,12 @@ public abstract class GUI extends JFrame implements WindowListener, ActionListen
             e.printStackTrace();
         }
     }
+
+    /**
+     * Updates the screen showing new logged in users.
+     * @param users
+     */
+    public abstract void updateUsers(ConcurrentHashMap<String, String> users);
 
     @Override
     public void windowOpened(WindowEvent e) {
