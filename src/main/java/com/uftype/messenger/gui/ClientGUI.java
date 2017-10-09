@@ -16,7 +16,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 
 public class ClientGUI extends GUI {
-    public JButton logout, file, code;
+    public JButton logout, file, code, user;
     protected Login login;
     protected RSyntaxTextArea textArea;
     //Create a file chooser
@@ -38,8 +38,7 @@ public class ClientGUI extends GUI {
         buttonPanel.add(file);
         add(buttonPanel, BorderLayout.NORTH);
 
-        JPanel screen = new JPanel(new GridLayout(1,2));
-
+        JPanel screen = new JPanel(new GridLayout(1,3));
 
         textArea = new RSyntaxTextArea();
         JPanel cp = new JPanel(new GridLayout(2, 1));
@@ -52,8 +51,14 @@ public class ClientGUI extends GUI {
         code.addActionListener(this);
         cp.add(code);
 
+        JPanel otherUsers = new JPanel(new GridLayout(1, 1));
+        user = new JButton("User"); // Need to populate with currently logged in users
+        user.addActionListener(this); // To create a chat window with that one user
+        otherUsers.add(new JScrollPane(otherUsers));
+
         screen.add(chatPanel, BorderLayout.WEST);
-        screen.add(cp, BorderLayout.EAST);
+        screen.add(cp, BorderLayout.CENTER);
+        screen.add(otherUsers, BorderLayout.EAST);
         add(screen, BorderLayout.CENTER);
 
         // Make a login/register opening frame, and when it successfully authenticates, load frame
