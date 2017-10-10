@@ -3,6 +3,7 @@ package com.uftype.messenger.gui;
 import com.uftype.messenger.common.Communication;
 import com.uftype.messenger.common.Dispatcher;
 import com.uftype.messenger.proto.ChatMessage;
+import com.uftype.messenger.server.ServerDispatcher;
 
 import javax.swing.*;
 import java.awt.*;
@@ -45,10 +46,11 @@ public class ServerGUI extends GUI {
                 // Get the associated key to attach message
                 SelectionKey key = dispatcher.channel.keyFor(dispatcher.selector);
                 // Build and attach message
-                ChatMessage.Message chatMessage = Communication.buildMessage(messages.getText(), dispatcher.username,
+                ChatMessage.Message chatMessage = Communication.buildMessage(
+                        messages.getText(), dispatcher.username, "ALL",
                         key.channel(), ChatMessage.Message.ChatType.TEXT);
                 key.attach(ByteBuffer.wrap(chatMessage.toByteArray()));
-                dispatcher.doWrite(key);
+                ((ServerDispatcher)dispatcher).doWriteAll(key);
 
                 addChat(dispatcher.username + ": " + messages.getText());
                 messages.setText(""); // Clear message

@@ -28,12 +28,11 @@ public class Server {
     private void connect(int port) throws IOException {
         try {
             serverDispatcher = new ServerDispatcher(new InetSocketAddress("127.0.0.1", port));
-            serverReceiver = new Receiver(serverDispatcher);
+            // Can set server receiver if not using GUI
 
             serverDispatcher.gui.addEvent("The UF TYPE chat server is initialized on port " +
                     port + ". It is ready for chatting!");
 
-            serverReceiver.start();
             serverDispatcher.run();
         } catch (IOException e) {
             LOGGER.log(Level.WARNING, "UF TYPE server failure: " + e);

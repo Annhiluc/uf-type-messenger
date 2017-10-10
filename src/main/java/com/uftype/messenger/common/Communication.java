@@ -18,28 +18,22 @@ public class Communication {
     /**
      * Build ChatMessage.Message as defined in ChatMessage.proto for communication.
      */
-    public static ChatMessage.Message buildMessage (String message, String username, SelectableChannel socketChannel,
+    public static ChatMessage.Message buildMessage (String message, String username, String recipient, SelectableChannel socketChannel,
                                                    ChatMessage.Message.ChatType chatType) throws IOException {
-        ChatMessage.Message.Builder messageBuilder = initializeMessage(socketChannel);
-        messageBuilder.setUsername(username);
-        if (message != null) {
-            messageBuilder.setText(message);
-        }
-        messageBuilder.setType(chatType);
-
-        return messageBuilder.build();
+        return buildMessage(message, null, username, recipient, socketChannel, chatType);
     }
 
     /**
      * Build ChatMessage.Message as defined in ChatMessage.proto for communication.
      */
-    public static ChatMessage.Message buildMessage (String message, byte[] file, String username, SelectableChannel socketChannel,
+    public static ChatMessage.Message buildMessage (String message, byte[] file, String username, String recipient, SelectableChannel socketChannel,
                                                     ChatMessage.Message.ChatType chatType) throws IOException {
         ChatMessage.Message.Builder messageBuilder = initializeMessage(socketChannel);
         messageBuilder.setUsername(username);
         if (message != null) {
             messageBuilder.setText(message);
         }
+        messageBuilder.setRecipient(recipient); // Should be a host address or "ALL"
         if (file != null) {
             messageBuilder.setFile(ByteString.copyFrom(file));
         }
@@ -64,18 +58,15 @@ public class Communication {
                 // Represents a client channel
                 channel = (SocketChannel) socketChannel;
                 localAddress = channel.socket().getLocalSocketAddress().toString();
-                remoteAddress = channel.socket().getRemoteSocketAddress().toString();
             }
             else {
                 // Represents the server channel
                 serverChannel = (ServerSocketChannel) socketChannel;
                 localAddress = serverChannel.socket().getLocalSocketAddress().toString();
-                remoteAddress = "ALL";
             }
         }
 
         messageBuilder.setSender(localAddress);
-        messageBuilder.setRecipient(remoteAddress);
 
         return messageBuilder;
     }

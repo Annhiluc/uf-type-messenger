@@ -8,8 +8,10 @@ import com.uftype.messenger.proto.ChatMessage;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
 import static java.nio.channels.SelectionKey.OP_ACCEPT;
@@ -17,6 +19,7 @@ import static java.nio.channels.SelectionKey.OP_READ;
 
 public class ServerDispatcher extends Dispatcher {
     ChatMessage.Message.Builder welcome = ChatMessage.Message.newBuilder();
+    ConcurrentHashMap<SocketChannel, String> connections = new ConcurrentHashMap<>();
 
     public ServerDispatcher(InetSocketAddress address) throws IOException {
         super(address);
@@ -26,6 +29,7 @@ public class ServerDispatcher extends Dispatcher {
         welcome.setSender(address.toString());
         welcome.setType(ChatMessage.Message.ChatType.TEXT);
 
+        connections = new ConcurrentHashMap<>();
 
         // Set up ServerGUI
         ServerGUI gui = new ServerGUI(this);
@@ -71,6 +75,9 @@ public class ServerDispatcher extends Dispatcher {
                 // Build and send welcome message
                 welcome.setRecipient(socketChannel.socket().getLocalSocketAddress().toString());
                 socketChannel.write(ByteBuffer.wrap(welcome.build().toByteArray()));
+
+                // Add to connections
+                connections.put(socketChannel, address);
             }
         } catch (IOException e) {
             LOGGER.log(Level.WARNING, "UF TYPE accept handler failure: " + e);
@@ -80,8 +87,7 @@ public class ServerDispatcher extends Dispatcher {
     /**
      * Writes any messages by broadcasting to all handles kept by the selector.
      */
-    @Override
-    public void doWrite(SelectionKey handle) throws IOException {
+    public void doWriteAll(SelectionKey handle) throws IOException {
         ByteBuffer buffer = (ByteBuffer) handle.attachment(); // Retrieve the message
 
         for (SelectionKey key : selector.keys()) {
@@ -106,25 +112,46 @@ public class ServerDispatcher extends Dispatcher {
         SelectionKey key = channel.keyFor(selector);
 
         switch (message.getType()) {
+            // For the special case of private messaging
+            case TEXT:
+                if (!message.getRecipient().equals("ALL")) {
+                    for (SelectionKey sk : selector.keys()) {
+                        if (sk.channel() instanceof SocketChannel &&
+                                connections.get((SocketChannel)(sk.channel())).equals(message.getRecipient())) {
+                            sk.attach(ByteBuffer.wrap(message.toByteArray()));
+                            doWrite(sk);
+                            gui.addEvent("Send private message to " + message.getRecipient());
+                        }
+                    }
+                }
+                else {
+                    super.handleData(message);
+                }
+                break;
             case LOGIN:
                 // Mirror request to client side to handle
             case NEWUSER:
                 // Update username
                 this.connectedHosts.put(message.getSender(), message.getUsername());
-                ChatMessage.Message chatMessage = Communication.buildMessage(Communication.getString(this.connectedHosts), username,
+                ChatMessage.Message chatMessage = Communication.buildMessage(
+                        Communication.getString(this.connectedHosts), username, "ALL",
                         key.channel(), ChatMessage.Message.ChatType.WHOISIN);
                 key.attach(ByteBuffer.wrap(chatMessage.toByteArray()));
-                doWrite(key);
+                doWriteAll(key);
                 gui.addEvent("Someone entered the chat room: " + address);
                 break;
             case LOGOUT:
                 // Need to handle here to remove from connected hosts and update
                 this.connectedHosts.remove(message.getSender());
                 // Build and attach message
-                chatMessage = Communication.buildMessage(Communication.getString(this.connectedHosts), username,
+                chatMessage = Communication.buildMessage(Communication.getString(
+                        this.connectedHosts), username, "ALL",
                         key.channel(), ChatMessage.Message.ChatType.WHOISIN);
                 key.attach(ByteBuffer.wrap(chatMessage.toByteArray()));
-                doWrite(key);
+                doWriteAll(key);
+
+                // Remove from connections
+                connections.remove(key);
             default:
                 super.handleData(message);
                 break;

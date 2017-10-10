@@ -17,6 +17,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static java.lang.System.arraycopy;
+import static java.nio.channels.SelectionKey.OP_READ;
 import static java.nio.channels.SelectionKey.OP_WRITE;
 
 /**
@@ -64,11 +65,6 @@ public abstract class Dispatcher implements Runnable {
     protected abstract Selector getSelector() throws IOException;
 
     /**
-     * Writes any messages connected to the handle.
-     */
-    public abstract void doWrite(SelectionKey handle) throws IOException;
-
-    /**
      * Closes all channels which are currently held by selector.
      */
     public void stop() {
@@ -106,8 +102,6 @@ public abstract class Dispatcher implements Runnable {
                         doConnect(handle);
                     } else if (handle.isReadable()) {
                         doRead(handle);
-                    } else if (handle.isWritable()) {
-                        doWrite(handle);
                     }
                 }
             } catch (ClosedSelectorException e) {
@@ -147,7 +141,7 @@ public abstract class Dispatcher implements Runnable {
                 }
 
                 // Build and attach message with username
-                ChatMessage.Message chatMessage = Communication.buildMessage("", username,
+                ChatMessage.Message chatMessage = Communication.buildMessage("", username, "ALL",
                         key.channel(), ChatMessage.Message.ChatType.NEWUSER);
                 key.attach(ByteBuffer.wrap(chatMessage.toByteArray()));
                 doWrite(key);
@@ -172,14 +166,12 @@ public abstract class Dispatcher implements Runnable {
                 read = socketChannel.read(buffer);
             } catch (IOException e) {
                 gui.addEvent("Another connection has disconnected.");
-                handle.cancel();
                 socketChannel.close();
                 return;
             }
 
             if (read == -1) {
                 handle.channel().close();
-                handle.cancel();
                 return;
             }
 
@@ -190,6 +182,27 @@ public abstract class Dispatcher implements Runnable {
 
             // Depending on the type of message, handle data
             handleData(message);
+    }
+
+    /**
+     * Writes any messages connected to the handle.
+     */
+    public void doWrite(SelectionKey handle) throws IOException {
+        /*while (!messageQueue.isEmpty()) {
+            ChatMessage.Message toSend = messageQueue.poll();
+            socketChannel.write(ByteBuffer.wrap(toSend.toByteArray()));
+        }*/
+
+        if (handle.channel() instanceof SocketChannel) {
+            SocketChannel socketChannel = (SocketChannel) handle.channel();
+            ByteBuffer buffer = (ByteBuffer) handle.attachment();
+
+            if (buffer != null) {
+                socketChannel.write(buffer);
+            }
+
+            handle.interestOps(OP_READ);
+        }
     }
 
     /**

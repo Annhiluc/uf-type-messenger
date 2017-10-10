@@ -95,7 +95,7 @@ public class ClientGUI extends GUI {
                 // Get the associated key to attach message
                 SelectionKey key = dispatcher.channel.keyFor(dispatcher.selector);
                 // Build and attach message
-                ChatMessage.Message chatMessage = Communication.buildMessage(messages.getText(), dispatcher.username,
+                ChatMessage.Message chatMessage = Communication.buildMessage(messages.getText(), dispatcher.username, "ALL",
                         key.channel(), ChatMessage.Message.ChatType.TEXT);
                 key.attach(ByteBuffer.wrap(chatMessage.toByteArray()));
                 dispatcher.doWrite(key);
@@ -111,7 +111,7 @@ public class ClientGUI extends GUI {
                 // Get the associated key to attach message
                 SelectionKey key = dispatcher.channel.keyFor(dispatcher.selector);
                 // Build and attach message
-                ChatMessage.Message chatMessage = Communication.buildMessage(textArea.getText(), dispatcher.username,
+                ChatMessage.Message chatMessage = Communication.buildMessage(textArea.getText(), dispatcher.username, "ALL",
                         key.channel(), ChatMessage.Message.ChatType.CODE);
                 key.attach(ByteBuffer.wrap(chatMessage.toByteArray()));
                 dispatcher.doWrite(key);
@@ -131,6 +131,7 @@ public class ClientGUI extends GUI {
                 if (returnVal == JFileChooser.APPROVE_OPTION) {
                     // Send file
                     File myFile = fc.getSelectedFile();
+
                     byte [] mybytearray  = new byte [(int)myFile.length()];
                     BufferedInputStream bis = new BufferedInputStream(new FileInputStream(myFile));
                     bis.read(mybytearray, 0, mybytearray.length);
@@ -144,7 +145,7 @@ public class ClientGUI extends GUI {
                     }
 
                     // Send file message
-                    ChatMessage.Message fileRequest = Communication.buildMessage(myFile.getName(), mybytearray,
+                    ChatMessage.Message fileRequest = Communication.buildMessage(myFile.getName(), mybytearray, "ALL",
                             dispatcher.username, key.channel(), ChatMessage.Message.ChatType.FILE);
 
                     // Write message here
@@ -167,8 +168,22 @@ public class ClientGUI extends GUI {
                 err.printStackTrace();
             }
         }
-        else if (users.containsKey(o)) {
+        else if (users.containsKey(o) && !messages.getText().equals("")) {
             // Need to send specific message
+            try {
+                // Get the associated key to attach message
+                SelectionKey key = dispatcher.channel.keyFor(dispatcher.selector);
+                // Build and attach message
+                ChatMessage.Message chatMessage = Communication.buildMessage(messages.getText(), dispatcher.username, users.get(o),
+                        key.channel(), ChatMessage.Message.ChatType.TEXT);
+                key.attach(ByteBuffer.wrap(chatMessage.toByteArray()));
+                dispatcher.doWrite(key);
+
+                addChat("PRIVATE MESSAGE to " + users.get(o) + " from " + dispatcher.username + ": " + messages.getText());
+                messages.setText(""); // Clear message
+            } catch (IOException err) {
+                err.printStackTrace();
+            }
         }
     }
 

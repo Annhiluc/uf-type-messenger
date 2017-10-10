@@ -62,25 +62,6 @@ public class ClientDispatcher extends Dispatcher {
     }
 
     /**
-     * Writes any messages to the server which are contained in the message queue.
-     */
-    @Override
-    public void doWrite(SelectionKey handle) throws IOException {
-        SocketChannel socketChannel = (SocketChannel) handle.channel();
-
-        /*while (!messageQueue.isEmpty()) {
-            ChatMessage.Message toSend = messageQueue.poll();
-            socketChannel.write(ByteBuffer.wrap(toSend.toByteArray()));
-        }*/
-
-        ByteBuffer buffer = (ByteBuffer) handle.attachment();
-        if (buffer != null) {
-            socketChannel.write(buffer);
-        }
-        handle.interestOps(OP_READ);
-    }
-
-    /**
      * Handle data based on type of message.
      */
     @Override
