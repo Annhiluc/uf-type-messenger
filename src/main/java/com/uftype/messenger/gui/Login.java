@@ -11,8 +11,8 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
 public class Login extends JFrame implements ActionListener, WindowListener {
-    protected JTextField username, firstName, lastName, email;
-    protected JPasswordField password;
+    protected JTextField usernameLogin, usernameRegister, firstName, lastName, email;
+    protected JPasswordField passwordLogin, passwordRegister;
     protected JPanel title, loginPanel, submitPanel, registerPanel;
     protected JButton submit, loginRegister;
     public UserContext loggedInUser;
@@ -40,14 +40,14 @@ public class Login extends JFrame implements ActionListener, WindowListener {
 
         loginPanel = new JPanel(new GridLayout(2,1));
         JLabel userLabel = new JLabel("Username:");
-        username = new JTextField(1);
+        usernameLogin = new JTextField(1);
         JLabel passLabel = new JLabel("Password:");
-        password = new JPasswordField(1);
+        passwordLogin = new JPasswordField(1);
 
         loginPanel.add(userLabel);
-        loginPanel.add(username);
+        loginPanel.add(usernameLogin);
         loginPanel.add(passLabel);
-        loginPanel.add(password);
+        loginPanel.add(passwordLogin);
         add(loginPanel, BorderLayout.CENTER);
 
         registerPanel = new JPanel(new GridLayout(5, 1));
@@ -56,9 +56,9 @@ public class Login extends JFrame implements ActionListener, WindowListener {
         JLabel lastLabel = new JLabel("Last name:");
         lastName = new JTextField(1);
         userLabel = new JLabel("Username:");
-        username = new JTextField(1);
+        usernameRegister = new JTextField(1);
         passLabel = new JLabel("Password:");
-        password = new JPasswordField(1);
+        passwordRegister = new JPasswordField(1);
         // Consider adding another password field here to verify password
         JLabel emailLabel = new JLabel("Email:");
         email = new JTextField(1);
@@ -69,9 +69,9 @@ public class Login extends JFrame implements ActionListener, WindowListener {
         registerPanel.add(lastLabel);
         registerPanel.add(lastName);
         registerPanel.add(userLabel);
-        registerPanel.add(username);
+        registerPanel.add(usernameRegister);
         registerPanel.add(passLabel);
-        registerPanel.add(password);
+        registerPanel.add(passwordRegister);
         registerPanel.add(emailLabel);
         registerPanel.add(email);
 
@@ -112,8 +112,8 @@ public class Login extends JFrame implements ActionListener, WindowListener {
         if (o == submit) {
             if (loginRegister.getText().equals("Register")) {
                 // On login page
-                String user = username.getText().trim();
-                String pass = new String(password.getPassword()).trim();
+                String user = usernameLogin.getText().trim();
+                String pass = new String(passwordLogin.getPassword()).trim();
 
                 if (Authentication.authenticate(user, pass) != null) {
                     loggedInUser = Authentication.login(user, pass);
@@ -123,15 +123,15 @@ public class Login extends JFrame implements ActionListener, WindowListener {
                 }
                 else {
                     JOptionPane.showMessageDialog(Login.this, "Incorrect credentials. Please try again.");
-                    username.setText("");
-                    password.setText("");
+                    usernameLogin.setText("");
+                    passwordLogin.setText("");
                     return;
                 }
             }
             else {
                 // On register page
-                String user = username.getText().trim();
-                String pass = new String(password.getPassword()).trim();
+                String user = usernameRegister.getText().trim();
+                String pass = new String(passwordRegister.getPassword()).trim();
                 String em = email.getText().trim();
                 String first = firstName.getText().trim();
                 String last = lastName.getText().trim();
@@ -144,8 +144,8 @@ public class Login extends JFrame implements ActionListener, WindowListener {
                 }
                 else {
                     JOptionPane.showMessageDialog(Login.this, "Invalid credentials. Please try again.");
-                    username.setText("");
-                    password.setText("");
+                    usernameRegister.setText("");
+                    passwordRegister.setText("");
                     email.setText("");
                     firstName.setText("");
                     lastName.setText("");
@@ -159,11 +159,15 @@ public class Login extends JFrame implements ActionListener, WindowListener {
                 remove(loginPanel);
                 add(registerPanel, BorderLayout.CENTER);
                 loginRegister.setText("Login");
+                repaint(); // Automatically update the screen
+
             } else {
                 // Switch to login page
                 remove(registerPanel);
                 add(loginPanel, BorderLayout.CENTER);
                 loginRegister.setText("Register");
+                validate(); // Automatically update the screen
+                repaint();
             }
         }
     }

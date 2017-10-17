@@ -191,17 +191,31 @@ public class ClientGUI extends GUI {
     public void updateUsers(ConcurrentHashMap<String, String> hosts) {
         screen.remove(this.otherUsers);
 
-        JPanel otherUsers = new JPanel(new GridLayout(hosts.size(), 1));
-        ConcurrentHashMap<JButton, String> newUsers = new ConcurrentHashMap<JButton, String>();
-        for (String host : hosts.keySet()) {
-            JButton user = new JButton(dispatcher.connectedHosts.get(host)); // Need to populate with currently logged in users
-            user.addActionListener(this); // To create a chat window with that one user
-            otherUsers.add(user);
-            newUsers.put(user, host);
-            users = newUsers;
+        this.otherUsers = new JPanel(new GridLayout(hosts.size(), 1));
+
+        // Remove hosts that have disconnected
+        for (JButton button : users.keySet()) {
+            if (hosts.containsValue(button.getText())) {
+                // Continue
+            }
+            else {
+                this.otherUsers.remove(button);
+            }
         }
 
-        this.otherUsers = otherUsers;
+        // Add new hosts not contained already
+        for (String host : hosts.keySet()) {
+            if (users.containsValue(dispatcher.connectedHosts.get(host))) {
+                // Continue
+            }
+            else {
+                JButton user = new JButton(dispatcher.connectedHosts.get(host)); // Need to populate with currently logged in users
+                user.addActionListener(this); // To create a chat window with that one user
+                this.otherUsers.add(user);
+            }
+        }
+
+        repaint(); // Automatically update the screen
 
         screen.add(otherUsers, BorderLayout.EAST);
     }
