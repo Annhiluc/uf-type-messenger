@@ -8,7 +8,9 @@ import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rtextarea.RTextScrollPane;
 
+import javax.sound.sampled.*;
 import javax.swing.*;
+import javax.swing.text.BadLocationException;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
@@ -269,6 +271,26 @@ public class ClientGUI extends GUI {
         validate();
         repaint(); // Automatically update the screen
         setVisible(true);
+    }
+
+    @Override
+    public void addChat(String message) {
+        super.addChat(message);
+
+        // Play a sound when something comes in
+        try {
+            String soundName = "src/main/resources/notification.wav";
+            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(new File(soundName).getAbsoluteFile());
+            Clip clip = AudioSystem.getClip();
+            clip.open(audioInputStream);
+            clip.start();
+        } catch (UnsupportedAudioFileException e) {
+            System.out.println("Unable to read file type.");
+        } catch (IOException e) {
+            System.out.println("Unable to find file.");
+        } catch (LineUnavailableException e) {
+            // Do nothing
+        }
     }
 
     @Override
