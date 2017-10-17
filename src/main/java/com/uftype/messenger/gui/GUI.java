@@ -19,12 +19,12 @@ public abstract class GUI extends JFrame implements WindowListener, ActionListen
     public JTextField messages;
     public JTextPane chat, event;
 
-    public GUI (Dispatcher dispatcher, String name) {
+    public GUI(Dispatcher dispatcher, String name) {
         super(name);
         this.dispatcher = dispatcher;
 
         // Add the chat room
-        chatPanel = new JPanel(new GridLayout(3,1));
+        chatPanel = new JPanel(new GridLayout(3, 1));
         chat = new JTextPane();
         chatPanel.add(new JScrollPane(chat));
         chatText = chat.getStyledDocument();
@@ -50,7 +50,7 @@ public abstract class GUI extends JFrame implements WindowListener, ActionListen
         messages = new JTextField("");
         label = new JLabel("Enter a chat message: ", SwingConstants.CENTER);
 
-        messagePanel = new JPanel(new GridLayout(2,1));
+        messagePanel = new JPanel(new GridLayout(2, 1));
         messagePanel.add(label);
         messagePanel.add(messages);
         chatPanel.add(messagePanel);
@@ -64,7 +64,7 @@ public abstract class GUI extends JFrame implements WindowListener, ActionListen
     public void loadScreen() {
         // Size the frame.
         //frame.pack();
-        setSize(1000,750);
+        setSize(1000, 750);
 
         // Set the frame icon to an image loaded from a file.
         setIconImage(new ImageIcon("src/main/resources/type-icon.png").getImage());
@@ -85,15 +85,14 @@ public abstract class GUI extends JFrame implements WindowListener, ActionListen
             dispatcher.stop();
             dispose();
             System.exit(0);
-        }
-        else {
+        } else {
             return;
         }
     }
 
     public void addChat(String message) {
         try {
-            chatText.insertString(chatText.getLength(),message + "\n", null);
+            chatText.insertString(chatText.getLength(), message + "\n", null);
         } catch (BadLocationException e) {
             e.printStackTrace();
         }
@@ -101,7 +100,7 @@ public abstract class GUI extends JFrame implements WindowListener, ActionListen
 
     public void addEvent(String message) {
         try {
-            eventText.insertString(eventText.getLength(),message + "\n", null);
+            eventText.insertString(eventText.getLength(), message + "\n", null);
         } catch (BadLocationException e) {
             e.printStackTrace();
         }
@@ -109,6 +108,7 @@ public abstract class GUI extends JFrame implements WindowListener, ActionListen
 
     /**
      * Updates the screen showing new logged in users.
+     *
      * @param users
      */
     public abstract void updateUsers(ConcurrentHashMap<String, String> users);

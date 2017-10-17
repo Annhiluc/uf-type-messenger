@@ -65,7 +65,7 @@ public class ClientDispatcher extends Dispatcher {
      * Handle data based on type of message.
      */
     @Override
-    public void handleData (ChatMessage.Message message) throws IOException {
+    public void handleData(ChatMessage.Message message) throws IOException {
         switch (message.getType()) {
             case LOGOUT:
                 Authentication.logout(username);
@@ -75,8 +75,7 @@ public class ClientDispatcher extends Dispatcher {
                 if (registerUser()) {
                     // Successfully registered user
                     gui.addChat("You've successfully registered! Chat away!");
-                }
-                else {
+                } else {
                     gui.addChat("Uh-oh! Registration failed, please try again!");
                 }
             case WHOISIN:
@@ -88,7 +87,7 @@ public class ClientDispatcher extends Dispatcher {
                     newHosts.put(mapping[0], mapping[1]); // Where 0 is the host, and 1 is the username
                 }
 
-                this.connectedHosts = newHosts;
+                connectedHosts = newHosts;
                 // Tell gui to update
                 gui.updateUsers(newHosts);
                 break;
@@ -100,6 +99,7 @@ public class ClientDispatcher extends Dispatcher {
 
     /**
      * This will be used in a command-line case.
+     *
      * @return
      */
     private boolean authenticateUser() {
@@ -110,10 +110,9 @@ public class ClientDispatcher extends Dispatcher {
         String password = in.nextLine();
 
         UserContext user = Authentication.login(username, password);
-        if (user ==  null) {
+        if (user == null) {
             return false;
-        }
-        else {
+        } else {
             // Handle setting up the new UserContext
             this.username = user.username;
         }
@@ -123,6 +122,7 @@ public class ClientDispatcher extends Dispatcher {
 
     /**
      * This will be used in a command-line case.
+     *
      * @return
      */
     private boolean registerUser() {

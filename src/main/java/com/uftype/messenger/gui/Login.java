@@ -18,7 +18,7 @@ public class Login extends JFrame implements ActionListener, WindowListener {
     public UserContext loggedInUser;
     protected GUI gui;
 
-    public Login (GUI gui) {
+    public Login(GUI gui) {
         super("UF TYPE Messenger");
 
         loggedInUser = null;
@@ -28,7 +28,7 @@ public class Login extends JFrame implements ActionListener, WindowListener {
         loginRegister.addActionListener(this);
         loginRegister.setEnabled(true);
 
-        title = new JPanel(new GridLayout(3,1));
+        title = new JPanel(new GridLayout(3, 1));
         ImageIcon ii = new ImageIcon("src/main/resources/type-logo.png");
         JLabel label = new JLabel(ii);
         JLabel welcome = new JLabel("Welcome to the UF TYPE Messenger!");
@@ -38,7 +38,7 @@ public class Login extends JFrame implements ActionListener, WindowListener {
         title.add(loginRegister);
         add(title, BorderLayout.NORTH);
 
-        loginPanel = new JPanel(new GridLayout(2,1));
+        loginPanel = new JPanel(new GridLayout(2, 1));
         JLabel userLabel = new JLabel("Username:");
         usernameLogin = new JTextField(1);
         JLabel passLabel = new JLabel("Password:");
@@ -77,7 +77,7 @@ public class Login extends JFrame implements ActionListener, WindowListener {
 
         // Will add this panel to frame when register button pressed
 
-        submitPanel = new JPanel(new GridLayout(1,1));
+        submitPanel = new JPanel(new GridLayout(1, 1));
         submit = new JButton("Submit");
         submit.addActionListener(this);
         submitPanel.add(submit);
@@ -96,7 +96,7 @@ public class Login extends JFrame implements ActionListener, WindowListener {
 
         // Size the frame.
         //frame.pack();
-        setSize(1200,800);
+        setSize(1200, 800);
 
         // Set the frame icon to an image loaded from a file.
         setIconImage(new ImageIcon("src/main/resources/type-icon.png").getImage());
@@ -122,15 +122,13 @@ public class Login extends JFrame implements ActionListener, WindowListener {
                     gui.loadScreen();
                     // This window closes.
                     dispose();
-                }
-                else {
+                } else {
                     JOptionPane.showMessageDialog(Login.this, "Incorrect credentials. Please try again.");
                     usernameLogin.setText("");
                     passwordLogin.setText("");
                     return;
                 }
-            }
-            else {
+            } else {
                 // On register page
                 String user = usernameRegister.getText().trim();
                 String pass = new String(passwordRegister.getPassword()).trim();
@@ -143,8 +141,7 @@ public class Login extends JFrame implements ActionListener, WindowListener {
                     gui.loadScreen();
                     // This window closes.
                     dispose();
-                }
-                else {
+                } else {
                     JOptionPane.showMessageDialog(Login.this, "Invalid credentials. Please try again.");
                     usernameRegister.setText("");
                     passwordRegister.setText("");
@@ -154,8 +151,7 @@ public class Login extends JFrame implements ActionListener, WindowListener {
                     return;
                 }
             }
-        }
-        else if (o == loginRegister) {
+        } else if (o == loginRegister) {
             if (loginRegister.getText().equals("Register")) {
                 // Switch to register page with fields for name, username, etc.
                 remove(loginPanel);

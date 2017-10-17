@@ -44,7 +44,7 @@ public class ClientGUI extends GUI {
         buttonPanel.add(file);
         add(buttonPanel, BorderLayout.NORTH);
 
-        screen = new JPanel(new GridLayout(1,3));
+        screen = new JPanel(new GridLayout(1, 3));
 
         textArea = new RSyntaxTextArea();
         JPanel cp = new JPanel(new GridLayout(2, 1));
@@ -57,7 +57,7 @@ public class ClientGUI extends GUI {
         code.addActionListener(this);
         cp.add(code);
 
-        this.otherUsers = new JPanel();
+        otherUsers = new JPanel();
 
         screen.add(chatPanel, BorderLayout.WEST);
         screen.add(cp, BorderLayout.CENTER);
@@ -81,16 +81,14 @@ public class ClientGUI extends GUI {
                 dispatcher.stop();
                 dispose();
                 System.exit(0);
-            }
-            else {
+            } else {
                 // Something failed, quit application
                 System.out.println("Error logging out of the application.");
                 dispatcher.stop();
                 dispose();
                 System.exit(1);
             }
-        }
-        else if (o == messages && !messages.getText().equals("")){
+        } else if (o == messages && !messages.getText().equals("")) {
             try {
                 // Get the associated key to attach message
                 SelectionKey key = dispatcher.channel.keyFor(dispatcher.selector);
@@ -105,8 +103,7 @@ public class ClientGUI extends GUI {
             } catch (IOException err) {
                 err.printStackTrace();
             }
-        }
-        else if (o == code && !textArea.getText().equals("")) {
+        } else if (o == code && !textArea.getText().equals("")) {
             try {
                 // Get the associated key to attach message
                 SelectionKey key = dispatcher.channel.keyFor(dispatcher.selector);
@@ -121,8 +118,7 @@ public class ClientGUI extends GUI {
             } catch (IOException err) {
                 err.printStackTrace();
             }
-        }
-        else if (o == file) {
+        } else if (o == file) {
             // Transfer file here
             try {
                 //In response to a button click:
@@ -132,7 +128,7 @@ public class ClientGUI extends GUI {
                     // Send file
                     File myFile = fc.getSelectedFile();
 
-                    byte [] mybytearray  = new byte [(int)myFile.length()];
+                    byte[] mybytearray = new byte[(int) myFile.length()];
                     BufferedInputStream bis = new BufferedInputStream(new FileInputStream(myFile));
                     bis.read(mybytearray, 0, mybytearray.length);
 
@@ -167,8 +163,7 @@ public class ClientGUI extends GUI {
             } catch (IOException err) {
                 err.printStackTrace();
             }
-        }
-        else if (users.containsKey(o) && !messages.getText().equals("")) {
+        } else if (users.containsKey(o) && !messages.getText().equals("")) {
             // Need to send specific message
             try {
                 // Get the associated key to attach message
@@ -194,7 +189,7 @@ public class ClientGUI extends GUI {
         // Remove hosts that have disconnected
         for (JButton button : users.keySet()) {
             if (!hosts.containsValue(button.getText())) {
-                this.otherUsers.remove(button);
+                otherUsers.remove(button);
             }
         }
 

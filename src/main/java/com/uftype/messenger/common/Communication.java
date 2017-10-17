@@ -18,7 +18,7 @@ public class Communication {
     /**
      * Build ChatMessage.Message as defined in ChatMessage.proto for communication.
      */
-    public static ChatMessage.Message buildMessage (String message, String username, String recipient, SelectableChannel socketChannel,
+    public static ChatMessage.Message buildMessage(String message, String username, String recipient, SelectableChannel socketChannel,
                                                    ChatMessage.Message.ChatType chatType) throws IOException {
         return buildMessage(message, null, username, recipient, socketChannel, chatType);
     }
@@ -26,8 +26,8 @@ public class Communication {
     /**
      * Build ChatMessage.Message as defined in ChatMessage.proto for communication.
      */
-    public static ChatMessage.Message buildMessage (String message, byte[] file, String username, String recipient, SelectableChannel socketChannel,
-                                                    ChatMessage.Message.ChatType chatType) throws IOException {
+    public static ChatMessage.Message buildMessage(String message, byte[] file, String username, String recipient, SelectableChannel socketChannel,
+                                                   ChatMessage.Message.ChatType chatType) throws IOException {
         ChatMessage.Message.Builder messageBuilder = initializeMessage(socketChannel);
         messageBuilder.setUsername(username);
         if (message != null) {
@@ -46,7 +46,7 @@ public class Communication {
      * Sets up a message builder with the username, recipient, and sender of the message.
      * The text, type, and username of the message still need to be set.
      */
-    public static ChatMessage.Message.Builder initializeMessage (SelectableChannel socketChannel) throws IOException{
+    public static ChatMessage.Message.Builder initializeMessage(SelectableChannel socketChannel) throws IOException {
         ChatMessage.Message.Builder messageBuilder = ChatMessage.Message.newBuilder();
 
         SocketChannel channel;
@@ -58,8 +58,7 @@ public class Communication {
                 // Represents a client channel
                 channel = (SocketChannel) socketChannel;
                 localAddress = channel.socket().getLocalSocketAddress().toString();
-            }
-            else {
+            } else {
                 // Represents the server channel
                 serverChannel = (ServerSocketChannel) socketChannel;
                 localAddress = serverChannel.socket().getLocalSocketAddress().toString();
@@ -73,6 +72,7 @@ public class Communication {
 
     /**
      * Returns a string representation of a vector of Strings.
+     *
      * @return
      */
     public static String getString(ConcurrentHashMap<String, String> hosts) {

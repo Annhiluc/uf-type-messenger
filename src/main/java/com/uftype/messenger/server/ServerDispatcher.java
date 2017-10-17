@@ -25,7 +25,7 @@ public class ServerDispatcher extends Dispatcher {
         super(address);
         username = "UF TYPE Server";
         welcome.setText("Welcome to UF TYPE Messenger Chat!");
-        welcome.setUsername(this.username);
+        welcome.setUsername(username);
         welcome.setSender(address.toString());
         welcome.setType(ChatMessage.Message.ChatType.TEXT);
 
@@ -61,7 +61,7 @@ public class ServerDispatcher extends Dispatcher {
      * Accept connections; should only be implemented by ServerDispatcher.
      */
     @Override
-    protected void doAccept (SelectionKey handle) throws IOException {
+    protected void doAccept(SelectionKey handle) throws IOException {
 
         try {
             ServerSocketChannel serverSocketChannel = (ServerSocketChannel) handle.channel();
@@ -107,7 +107,7 @@ public class ServerDispatcher extends Dispatcher {
      * Handle data based on type of message.
      */
     @Override
-    public void handleData (ChatMessage.Message message) throws IOException {
+    public void handleData(ChatMessage.Message message) throws IOException {
         // Get the associated key to attach message
         SelectionKey key = channel.keyFor(selector);
 
@@ -117,14 +117,13 @@ public class ServerDispatcher extends Dispatcher {
                 if (!message.getRecipient().equals("ALL")) {
                     for (SelectionKey sk : selector.keys()) {
                         if (sk.channel() instanceof SocketChannel &&
-                                connections.get((SocketChannel)(sk.channel())).equals(message.getRecipient())) {
+                                connections.get((SocketChannel) (sk.channel())).equals(message.getRecipient())) {
                             sk.attach(ByteBuffer.wrap(message.toByteArray()));
                             doWrite(sk);
                             gui.addEvent("Send private message to " + message.getRecipient());
                         }
                     }
-                }
-                else {
+                } else {
                     super.handleData(message);
                 }
                 break;
@@ -132,9 +131,9 @@ public class ServerDispatcher extends Dispatcher {
                 // Mirror request to client side to handle
             case NEWUSER:
                 // Update username
-                this.connectedHosts.put(message.getSender(), message.getUsername());
+                connectedHosts.put(message.getSender(), message.getUsername());
                 ChatMessage.Message chatMessage = Communication.buildMessage(
-                        Communication.getString(this.connectedHosts), username, "ALL",
+                        Communication.getString(connectedHosts), username, "ALL",
                         key.channel(), ChatMessage.Message.ChatType.WHOISIN);
                 key.attach(ByteBuffer.wrap(chatMessage.toByteArray()));
                 doWriteAll(key);
@@ -142,10 +141,10 @@ public class ServerDispatcher extends Dispatcher {
                 break;
             case LOGOUT:
                 // Need to handle here to remove from connected hosts and update
-                this.connectedHosts.remove(message.getSender());
+                connectedHosts.remove(message.getSender());
                 // Build and attach message
                 chatMessage = Communication.buildMessage(Communication.getString(
-                        this.connectedHosts), username, "ALL",
+                        connectedHosts), username, "ALL",
                         key.channel(), ChatMessage.Message.ChatType.WHOISIN);
                 key.attach(ByteBuffer.wrap(chatMessage.toByteArray()));
                 doWriteAll(key);

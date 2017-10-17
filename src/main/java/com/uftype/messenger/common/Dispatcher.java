@@ -37,7 +37,7 @@ public abstract class Dispatcher implements Runnable {
 
     protected final Logger LOGGER = Logger.getLogger(Dispatcher.class.getName());
 
-    public Dispatcher(InetSocketAddress address) throws IOException{
+    public Dispatcher(InetSocketAddress address) throws IOException {
         this.address = address;
         this.buffer = ByteBuffer.allocate(1048567);
         this.channel = getChannel(address);
@@ -48,6 +48,7 @@ public abstract class Dispatcher implements Runnable {
 
     /**
      * Set GUI object for the dispatcher
+     *
      * @param gui
      */
     public void setGUI(GUI gui) {
@@ -118,14 +119,14 @@ public abstract class Dispatcher implements Runnable {
     /**
      * Accept connections; should only be implemented by ServerDispatcher.
      */
-    protected void doAccept (SelectionKey handle) throws Exception {
+    protected void doAccept(SelectionKey handle) throws Exception {
         throw new Exception();
     }
 
     /**
      * Connect to SocketChannel.
      */
-    protected void doConnect (SelectionKey handle) throws IOException {
+    protected void doConnect(SelectionKey handle) throws IOException {
         try {
             SocketChannel socketChannel = (SocketChannel) handle.channel();
 
@@ -156,32 +157,32 @@ public abstract class Dispatcher implements Runnable {
     /**
      * Perform a read operation on the incoming data. Print data to the screen.
      */
-    protected void doRead (SelectionKey handle) throws IOException {
-            SocketChannel socketChannel = (SocketChannel) handle.channel();
-            buffer.clear();
+    protected void doRead(SelectionKey handle) throws IOException {
+        SocketChannel socketChannel = (SocketChannel) handle.channel();
+        buffer.clear();
 
-            int read;
+        int read;
 
-            try {
-                read = socketChannel.read(buffer);
-            } catch (IOException e) {
-                gui.addEvent("Another connection has disconnected.");
-                socketChannel.close();
-                return;
-            }
+        try {
+            read = socketChannel.read(buffer);
+        } catch (IOException e) {
+            gui.addEvent("Another connection has disconnected.");
+            socketChannel.close();
+            return;
+        }
 
-            if (read == -1) {
-                handle.channel().close();
-                return;
-            }
+        if (read == -1) {
+            handle.channel().close();
+            return;
+        }
 
-            byte[] data = new byte[buffer.position()];
-            arraycopy(buffer.array(), 0, data, 0, buffer.position());
+        byte[] data = new byte[buffer.position()];
+        arraycopy(buffer.array(), 0, data, 0, buffer.position());
 
-            ChatMessage.Message message = ChatMessage.Message.parseFrom(data);
+        ChatMessage.Message message = ChatMessage.Message.parseFrom(data);
 
-            // Depending on the type of message, handle data
-            handleData(message);
+        // Depending on the type of message, handle data
+        handleData(message);
     }
 
     /**
@@ -208,7 +209,7 @@ public abstract class Dispatcher implements Runnable {
     /**
      * Handle data based on type of message.
      */
-    public void handleData (ChatMessage.Message message) throws IOException {
+    public void handleData(ChatMessage.Message message) throws IOException {
         switch (message.getType()) {
             case TEXT:
                 String formatted = message.getUsername() + ": " + message.getText();
@@ -217,9 +218,9 @@ public abstract class Dispatcher implements Runnable {
             case FILE:
                 try {
                     // Receive file
-                    byte[] mybytearray  = message.getFile().toByteArray();
+                    byte[] mybytearray = message.getFile().toByteArray();
                     BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(message.getText()));
-                    bos.write(mybytearray, 0 , mybytearray.length);
+                    bos.write(mybytearray, 0, mybytearray.length);
 
                     // If image, put it in the chat message
                     if (message.getText().endsWith("jpg") || message.getText().endsWith("png")) {

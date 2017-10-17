@@ -40,8 +40,7 @@ public class ServerGUI extends GUI {
                 System.exit(0);
                 return;
             }
-        }
-        else if (o == messages && !messages.getText().equals("")){
+        } else if (o == messages && !messages.getText().equals("")) {
             try {
                 // Get the associated key to attach message
                 SelectionKey key = dispatcher.channel.keyFor(dispatcher.selector);
@@ -50,7 +49,7 @@ public class ServerGUI extends GUI {
                         messages.getText(), dispatcher.username, "ALL",
                         key.channel(), ChatMessage.Message.ChatType.TEXT);
                 key.attach(ByteBuffer.wrap(chatMessage.toByteArray()));
-                ((ServerDispatcher)dispatcher).doWriteAll(key);
+                ((ServerDispatcher) dispatcher).doWriteAll(key);
 
                 addChat(dispatcher.username + ": " + messages.getText());
                 messages.setText(""); // Clear message

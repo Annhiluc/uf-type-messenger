@@ -13,7 +13,7 @@ import java.util.logging.Logger;
 /**
  * Represents the chat client.
  */
-public class Client{
+public class Client {
     private final static Logger LOGGER = Logger.getLogger(Client.class.getName());
     private static Dispatcher clientDispatcher;
     private static Receiver clientReceiver;
