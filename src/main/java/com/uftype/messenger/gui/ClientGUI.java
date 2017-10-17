@@ -22,6 +22,7 @@ public class ClientGUI extends GUI {
     protected RSyntaxTextArea textArea;
     protected ConcurrentHashMap<JButton, String> users; // Maps between other users and their hostnames
     protected JPanel otherUsers, screen;
+    protected JComboBox languageList;
 
     //Create a file chooser
     final JFileChooser fc = new JFileChooser();
@@ -47,10 +48,16 @@ public class ClientGUI extends GUI {
         screen = new JPanel(new GridLayout(1, 3));
 
         textArea = new RSyntaxTextArea();
-        JPanel cp = new JPanel(new GridLayout(2, 1));
+        JPanel cp = new JPanel(new GridLayout(3, 1));
         textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JAVASCRIPT);
         textArea.setCodeFoldingEnabled(true);
         RTextScrollPane sp = new RTextScrollPane(textArea);
+
+        String[] languages = {"Java", "JavaScript", "C", "C++", "C#", "JSON", "HTML", "CSS", "Python"};
+        languageList = new JComboBox(languages);
+        languageList.addActionListener(this);
+        cp.add(languageList);
+
         cp.add(sp);
 
         code = new JButton("Send Code");
@@ -93,8 +100,8 @@ public class ClientGUI extends GUI {
                 // Get the associated key to attach message
                 SelectionKey key = dispatcher.channel.keyFor(dispatcher.selector);
                 // Build and attach message
-                ChatMessage.Message chatMessage = Communication.buildMessage(messages.getText(), dispatcher.username, "ALL",
-                        key.channel(), ChatMessage.Message.ChatType.TEXT);
+                ChatMessage.Message chatMessage = Communication.buildMessage(messages.getText(),
+                        dispatcher.username, "ALL", key.channel(), ChatMessage.Message.ChatType.TEXT);
                 key.attach(ByteBuffer.wrap(chatMessage.toByteArray()));
                 dispatcher.doWrite(key);
 
@@ -108,7 +115,8 @@ public class ClientGUI extends GUI {
                 // Get the associated key to attach message
                 SelectionKey key = dispatcher.channel.keyFor(dispatcher.selector);
                 // Build and attach message
-                ChatMessage.Message chatMessage = Communication.buildMessage(textArea.getText(), dispatcher.username, "ALL",
+                ChatMessage.Message chatMessage = Communication.buildCodeMessage(textArea.getText(),
+                        dispatcher.username, "ALL", (String) languageList.getSelectedItem(),
                         key.channel(), ChatMessage.Message.ChatType.CODE);
                 key.attach(ByteBuffer.wrap(chatMessage.toByteArray()));
                 dispatcher.doWrite(key);
@@ -141,8 +149,9 @@ public class ClientGUI extends GUI {
                     }
 
                     // Send file message
-                    ChatMessage.Message fileRequest = Communication.buildMessage(myFile.getName(), mybytearray, "ALL",
-                            dispatcher.username, key.channel(), ChatMessage.Message.ChatType.FILE);
+                    ChatMessage.Message fileRequest = Communication.buildMessage(myFile.getName(), mybytearray,
+                            "ALL", dispatcher.username, null, key.channel(),
+                            ChatMessage.Message.ChatType.FILE);
 
                     // Write message here
                     key.attach(ByteBuffer.wrap(fileRequest.toByteArray()));
@@ -163,18 +172,70 @@ public class ClientGUI extends GUI {
             } catch (IOException err) {
                 err.printStackTrace();
             }
+        } else if (o == languageList) {
+            JComboBox cb = (JComboBox) o;
+            String language = (String) cb.getSelectedItem();
+            switch (language) {
+                case "Java":
+                    textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JAVA);
+                    revalidate();
+                    repaint();
+                    break;
+                case "JavaScript":
+                    textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JAVASCRIPT);
+                    revalidate();
+                    repaint();
+                    break;
+                case "C":
+                    textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_C);
+                    revalidate();
+                    repaint();
+                    break;
+                case "C++":
+                    textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_CSHARP);
+                    revalidate();
+                    repaint();
+                    break;
+                case "C#":
+                    textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS);
+                    revalidate();
+                    repaint();
+                    break;
+                case "JSON":
+                    textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JSON);
+                    revalidate();
+                    repaint();
+                    break;
+                case "HTML":
+                    textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_HTML);
+                    revalidate();
+                    repaint();
+                    break;
+                case "CSS":
+                    textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_CSS);
+                    revalidate();
+                    repaint();
+                    break;
+                case "Python":
+                    textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_PYTHON);
+                    revalidate();
+                    repaint();
+                    break;
+            }
         } else if (users.containsKey(o) && !messages.getText().equals("")) {
             // Need to send specific message
             try {
                 // Get the associated key to attach message
                 SelectionKey key = dispatcher.channel.keyFor(dispatcher.selector);
                 // Build and attach message
-                ChatMessage.Message chatMessage = Communication.buildMessage(messages.getText(), dispatcher.username, users.get(o),
+                ChatMessage.Message chatMessage = Communication.buildMessage(messages.getText(),
+                        dispatcher.username, users.get(o),
                         key.channel(), ChatMessage.Message.ChatType.TEXT);
                 key.attach(ByteBuffer.wrap(chatMessage.toByteArray()));
                 dispatcher.doWrite(key);
 
-                addChat("PRIVATE MESSAGE to " + users.get(o) + " from " + dispatcher.username + ": " + messages.getText());
+                addChat("PRIVATE MESSAGE to " + users.get(o) + " from " + dispatcher.username + ": " +
+                        messages.getText());
                 messages.setText(""); // Clear message
             } catch (IOException err) {
                 err.printStackTrace();
@@ -196,7 +257,8 @@ public class ClientGUI extends GUI {
         // Add new hosts not contained already
         for (String host : hosts.keySet()) {
             if (!users.containsValue(host)) {
-                JButton user = new JButton(dispatcher.connectedHosts.get(host)); // Need to populate with currently logged in users
+                // Need to populate with currently logged in users
+                JButton user = new JButton(dispatcher.connectedHosts.get(host));
                 user.addActionListener(this); // To create a chat window with that one user
                 users.put(user, host);
 

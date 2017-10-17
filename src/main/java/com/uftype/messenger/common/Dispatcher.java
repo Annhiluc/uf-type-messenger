@@ -238,7 +238,7 @@ public abstract class Dispatcher implements Runnable {
                 }
                 break;
             case CODE:
-                CodeGUI code = new CodeGUI(message.getUsername(), message.getText());
+                CodeGUI code = new CodeGUI(message.getUsername(), message.getText(), message.getLanguage());
                 formatted = message.getUsername() + ": sent code\n" + message.getText();
                 gui.addEvent(formatted);
                 break;

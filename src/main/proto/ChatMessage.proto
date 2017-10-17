@@ -10,6 +10,7 @@ message Message {
     optional string text = 5;
     required ChatType type = 6;
     optional bytes file = 7;
+    optional string language = 8;
 
     enum ChatType {
         TEXT = 1;

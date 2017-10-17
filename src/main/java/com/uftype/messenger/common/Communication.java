@@ -20,13 +20,13 @@ public class Communication {
      */
     public static ChatMessage.Message buildMessage(String message, String username, String recipient, SelectableChannel socketChannel,
                                                    ChatMessage.Message.ChatType chatType) throws IOException {
-        return buildMessage(message, null, username, recipient, socketChannel, chatType);
+        return buildMessage(message, null, username, recipient, null, socketChannel, chatType);
     }
 
     /**
      * Build ChatMessage.Message as defined in ChatMessage.proto for communication.
      */
-    public static ChatMessage.Message buildMessage(String message, byte[] file, String username, String recipient, SelectableChannel socketChannel,
+    public static ChatMessage.Message buildMessage(String message, byte[] file, String username, String recipient, String language, SelectableChannel socketChannel,
                                                    ChatMessage.Message.ChatType chatType) throws IOException {
         ChatMessage.Message.Builder messageBuilder = initializeMessage(socketChannel);
         messageBuilder.setUsername(username);
@@ -37,9 +37,20 @@ public class Communication {
         if (file != null) {
             messageBuilder.setFile(ByteString.copyFrom(file));
         }
+        if (language != null) {
+            messageBuilder.setLanguage(language);
+        }
         messageBuilder.setType(chatType);
 
         return messageBuilder.build();
+    }
+
+    /**
+     * Build ChatMessage.Message as defined in ChatMessage.proto for communication.
+     */
+    public static ChatMessage.Message buildCodeMessage(String message, String username, String recipient, String language, SelectableChannel socketChannel,
+                                                   ChatMessage.Message.ChatType chatType) throws IOException {
+        return buildMessage(message, null, username, recipient, language, socketChannel, chatType);
     }
 
     /**
