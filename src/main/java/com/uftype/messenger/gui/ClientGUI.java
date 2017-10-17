@@ -20,7 +20,7 @@ public class ClientGUI extends GUI {
     public JButton logout, file, code;
     protected Login login;
     protected RSyntaxTextArea textArea;
-    protected ConcurrentHashMap<JButton, String> users;
+    protected ConcurrentHashMap<JButton, String> users; // Maps between other users and their hostnames
     protected JPanel otherUsers, screen;
 
     //Create a file chooser
@@ -189,35 +189,29 @@ public class ClientGUI extends GUI {
 
     @Override
     public void updateUsers(ConcurrentHashMap<String, String> hosts) {
-        screen.remove(this.otherUsers);
-
-        this.otherUsers = new JPanel(new GridLayout(hosts.size(), 1));
+        otherUsers.setLayout(new GridLayout(hosts.size(), 1));
 
         // Remove hosts that have disconnected
         for (JButton button : users.keySet()) {
-            if (hosts.containsValue(button.getText())) {
-                // Continue
-            }
-            else {
+            if (!hosts.containsValue(button.getText())) {
                 this.otherUsers.remove(button);
             }
         }
 
         // Add new hosts not contained already
         for (String host : hosts.keySet()) {
-            if (users.containsValue(dispatcher.connectedHosts.get(host))) {
-                // Continue
-            }
-            else {
+            if (!users.containsValue(host)) {
                 JButton user = new JButton(dispatcher.connectedHosts.get(host)); // Need to populate with currently logged in users
                 user.addActionListener(this); // To create a chat window with that one user
-                this.otherUsers.add(user);
+                users.put(user, host);
+
+                otherUsers.add(user);
             }
         }
 
+        validate();
         repaint(); // Automatically update the screen
-
-        screen.add(otherUsers, BorderLayout.EAST);
+        setVisible(true);
     }
 
     @Override

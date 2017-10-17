@@ -57,6 +57,8 @@ public abstract class GUI extends JFrame implements WindowListener, ActionListen
 
         messages.addActionListener(this);
         addWindowListener(this);
+
+        setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE); // Will not close unless prompted
     }
 
     public void loadScreen() {
@@ -83,7 +85,8 @@ public abstract class GUI extends JFrame implements WindowListener, ActionListen
             dispatcher.stop();
             dispose();
             System.exit(0);
-        } else {
+        }
+        else {
             return;
         }
     }

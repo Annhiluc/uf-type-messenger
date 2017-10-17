@@ -103,6 +103,8 @@ public class Login extends JFrame implements ActionListener, WindowListener {
 
         // Show it.
         setVisible(true);
+
+        setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE); // Will not close unless prompted
     }
 
     @Override
