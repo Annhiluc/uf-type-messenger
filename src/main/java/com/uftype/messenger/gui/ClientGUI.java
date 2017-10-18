@@ -20,7 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ClientGUI extends GUI {
     public JButton logout, file, code;
-    protected Login login;
+    public Login login;
     protected RSyntaxTextArea textArea;
     protected ConcurrentHashMap<JButton, String> users; // Maps between other users and their hostnames
     protected JPanel otherUsers, screen;

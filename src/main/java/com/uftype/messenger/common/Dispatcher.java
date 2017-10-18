@@ -1,5 +1,6 @@
 package com.uftype.messenger.common;
 
+import com.uftype.messenger.gui.ClientGUI;
 import com.uftype.messenger.gui.CodeGUI;
 import com.uftype.messenger.gui.GUI;
 import com.uftype.messenger.proto.ChatMessage;
@@ -8,6 +9,7 @@ import javax.swing.*;
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.*;
@@ -147,6 +149,14 @@ public abstract class Dispatcher implements Runnable {
                 key.attach(ByteBuffer.wrap(chatMessage.toByteArray()));
                 doWrite(key);
             }
+        } catch (ConnectException e) {
+            LOGGER.log(Level.WARNING, "UF TYPE server is not up.");
+            JOptionPane.showMessageDialog(gui, "UF TYPE server is not up. Please try again later.");
+            handle.channel().close();
+            handle.cancel();
+            ((ClientGUI)gui).login.dispose();
+            gui.dispose();
+            System.exit(0);
         } catch (IOException e) {
             LOGGER.log(Level.WARNING, "UF TYPE connect handler failure: " + e);
             handle.channel().close();
