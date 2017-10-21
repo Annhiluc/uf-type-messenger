@@ -154,7 +154,7 @@ public abstract class Dispatcher implements Runnable {
             JOptionPane.showMessageDialog(gui, "UF TYPE server is not up. Please try again later.");
             handle.channel().close();
             handle.cancel();
-            ((ClientGUI)gui).login.dispose();
+            ((ClientGUI) gui).login.dispose();
             gui.dispose();
             System.exit(0);
         } catch (IOException e) {

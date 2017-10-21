@@ -2,18 +2,18 @@ package com.uftype.messenger.client;
 
 import com.uftype.messenger.common.Dispatcher;
 import com.uftype.messenger.common.Receiver;
-import com.uftype.messenger.gui.ClientGUI;
 
+import java.applet.Applet;
+import java.awt.*;
 import java.io.*;
 import java.net.InetSocketAddress;
-import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  * Represents the chat client.
  */
-public class Client {
+public class Client extends Applet {
     private final static Logger LOGGER = Logger.getLogger(Client.class.getName());
     private static Dispatcher clientDispatcher;
     private static Receiver clientReceiver;
@@ -45,6 +45,19 @@ public class Client {
     private void disconnect() {
         clientReceiver = null;
         clientDispatcher.stop();
+    }
+
+    @Override
+    public void init() {
+        try {
+            Client client = new Client("127.0.0.1", 3000);
+        } catch (IOException e) {
+        }
+    }
+
+    @Override
+    public void paint(Graphics g) {
+
     }
 
     public static void main(String[] args) {

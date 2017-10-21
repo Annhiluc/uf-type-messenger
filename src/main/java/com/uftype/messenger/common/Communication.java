@@ -4,11 +4,9 @@ import com.google.protobuf.ByteString;
 import com.uftype.messenger.proto.ChatMessage;
 
 import java.io.IOException;
-import java.net.Socket;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -49,7 +47,7 @@ public class Communication {
      * Build ChatMessage.Message as defined in ChatMessage.proto for communication.
      */
     public static ChatMessage.Message buildCodeMessage(String message, String username, String recipient, String language, SelectableChannel socketChannel,
-                                                   ChatMessage.Message.ChatType chatType) throws IOException {
+                                                       ChatMessage.Message.ChatType chatType) throws IOException {
         return buildMessage(message, null, username, recipient, language, socketChannel, chatType);
     }
 

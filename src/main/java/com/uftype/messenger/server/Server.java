@@ -2,8 +2,9 @@ package com.uftype.messenger.server;
 
 import com.uftype.messenger.common.Dispatcher;
 import com.uftype.messenger.common.Receiver;
-import com.uftype.messenger.gui.ServerGUI;
 
+import java.applet.Applet;
+import java.awt.*;
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.util.logging.Level;
@@ -12,7 +13,7 @@ import java.util.logging.Logger;
 /**
  * Represents the chat server.
  */
-public class Server {
+public class Server extends Applet {
     private final static Logger LOGGER = Logger.getLogger(Server.class.getName());
     private static Dispatcher serverDispatcher;
     private static Receiver serverReceiver;
@@ -45,6 +46,19 @@ public class Server {
     public void disconnect() {
         serverReceiver = null;
         serverDispatcher.stop();
+    }
+
+    @Override
+    public void init() {
+        try {
+            Server server = new Server(3000);
+        } catch (IOException e) {
+        }
+    }
+
+    @Override
+    public void paint(Graphics g) {
+
     }
 
     public static void main(String[] args) {

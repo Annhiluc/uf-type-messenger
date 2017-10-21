@@ -10,7 +10,6 @@ import org.fife.ui.rtextarea.RTextScrollPane;
 
 import javax.sound.sampled.*;
 import javax.swing.*;
-import javax.swing.text.BadLocationException;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;

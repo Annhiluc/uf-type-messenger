@@ -2,7 +2,6 @@ package com.uftype.messenger.auth;
 
 import com.uftype.messenger.common.UserContext;
 
-import javax.xml.crypto.Data;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
