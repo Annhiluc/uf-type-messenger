@@ -3,7 +3,7 @@ package com.uftype.messenger.client;
 import com.uftype.messenger.common.Dispatcher;
 import com.uftype.messenger.common.Receiver;
 
-import java.applet.Applet;
+import javax.swing.*;
 import java.awt.*;
 import java.io.*;
 import java.net.InetSocketAddress;
@@ -13,13 +13,12 @@ import java.util.logging.Logger;
 /**
  * Represents the chat client.
  */
-public class Client extends Applet {
+public class Client extends JApplet {
     private final static Logger LOGGER = Logger.getLogger(Client.class.getName());
     private static Dispatcher clientDispatcher;
     private static Receiver clientReceiver;
 
-    public Client(String host, int port) throws IOException {
-        connect(host, port);
+    public Client() throws IOException {
     }
 
     /**
@@ -50,7 +49,7 @@ public class Client extends Applet {
     @Override
     public void init() {
         try {
-            Client client = new Client("127.0.0.1", 3000);
+            connect("127.0.0.1", 3000);
         } catch (IOException e) {
         }
     }
@@ -62,7 +61,8 @@ public class Client extends Applet {
 
     public static void main(String[] args) {
         try {
-            Client client = new Client("127.0.0.1", 3000);
+            Client client = new Client();
+            client.init();
         } catch (IOException e) {
         }
     }
