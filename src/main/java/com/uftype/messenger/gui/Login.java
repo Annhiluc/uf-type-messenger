@@ -9,6 +9,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
 
 public class Login extends JFrame implements ActionListener, WindowListener {
     protected JTextField usernameLogin, usernameRegister, firstName, lastName, email;
@@ -29,7 +32,8 @@ public class Login extends JFrame implements ActionListener, WindowListener {
         loginRegister.setEnabled(true);
 
         title = new JPanel(new GridLayout(3, 1));
-        ImageIcon ii = new ImageIcon("src/main/resources/type-logo.png");
+        //Get file from resources folder
+        ImageIcon ii = new ImageIcon(getClass().getClassLoader().getResource("type-logo.png"));
         JLabel label = new JLabel(ii);
         JLabel welcome = new JLabel("Welcome to the UF TYPE Messenger!");
         welcome.setHorizontalAlignment(0);
@@ -99,7 +103,7 @@ public class Login extends JFrame implements ActionListener, WindowListener {
         setSize(1200, 800);
 
         // Set the frame icon to an image loaded from a file.
-        setIconImage(new ImageIcon("src/main/resources/type-icon.png").getImage());
+        setIconImage(new ImageIcon(getClass().getClassLoader().getResource("type-icon.png")).getImage());
 
         // Show it.
         setVisible(true);

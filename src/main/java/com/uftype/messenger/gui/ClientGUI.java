@@ -278,8 +278,8 @@ public class ClientGUI extends GUI {
 
         // Play a sound when something comes in
         try {
-            String soundName = "src/main/resources/notification.wav";
-            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(new File(soundName).getAbsoluteFile());
+            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(
+                    getClass().getClassLoader().getResourceAsStream("notification.wav"));
             Clip clip = AudioSystem.getClip();
             clip.open(audioInputStream);
             clip.start();

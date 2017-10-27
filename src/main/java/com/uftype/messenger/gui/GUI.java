@@ -67,7 +67,7 @@ public abstract class GUI extends JFrame implements WindowListener, ActionListen
         setSize(1000, 750);
 
         // Set the frame icon to an image loaded from a file.
-        setIconImage(new ImageIcon("src/main/resources/type-icon.png").getImage());
+        setIconImage(new ImageIcon(getClass().getClassLoader().getResource("type-icon.png")).getImage());
 
         // Show it.
         setVisible(true);
