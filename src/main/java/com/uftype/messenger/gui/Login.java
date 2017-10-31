@@ -9,9 +9,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
 
 public class Login extends JFrame implements ActionListener, WindowListener {
     protected JTextField usernameLogin, usernameRegister, firstName, lastName, email;
