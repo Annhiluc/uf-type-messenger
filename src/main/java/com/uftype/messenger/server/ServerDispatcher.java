@@ -8,6 +8,7 @@ import com.uftype.messenger.proto.ChatMessage;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.nio.channels.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -123,6 +124,13 @@ public class ServerDispatcher extends Dispatcher {
                         }
                     }
                 } else {
+                    for (SelectionKey sk : selector.keys()) {
+                        if (sk.channel() instanceof SocketChannel &&
+                                !((SocketChannel) sk.channel()).getRemoteAddress().toString().equals(message.getSender())) {
+                            SocketChannel socketChannel = (SocketChannel) sk.channel();
+                            socketChannel.write(ByteBuffer.wrap(message.toByteArray()));
+                        }
+                    }
                     super.handleData(message);
                 }
                 break;

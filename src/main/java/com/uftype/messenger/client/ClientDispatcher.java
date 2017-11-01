@@ -61,8 +61,9 @@ public class ClientDispatcher extends Dispatcher {
     public void handleData(ChatMessage.Message message) throws IOException {
         switch (message.getType()) {
             case LOGOUT:
-                Authentication.logout(username);
-                gui.addChat("Have a nice day!");
+                gui.addEvent("Server has logged out. You may not chat anymore.");
+
+                /* Lock messaging. */
                 break;
             case NEWUSER:
                 if (registerUser()) {

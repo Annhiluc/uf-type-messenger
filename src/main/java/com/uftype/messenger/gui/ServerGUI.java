@@ -36,6 +36,19 @@ public class ServerGUI extends GUI {
         // Stop server if it is running
         if (o == start) {
             if (start.getText().equals("Stop")) {
+                // Need to alert other clients
+                try {
+                    SelectionKey key = dispatcher.channel.keyFor(dispatcher.selector);
+                    // Build and attach message
+                    ChatMessage.Message chatMessage = Communication.buildMessage(
+                            "", dispatcher.username, "ALL",
+                            key.channel(), ChatMessage.Message.ChatType.LOGOUT);
+                    key.attach(ByteBuffer.wrap(chatMessage.toByteArray()));
+                    ((ServerDispatcher) dispatcher).doWriteAll(key);
+                } catch (IOException err) {
+                    err.printStackTrace();
+                }
+
                 dispatcher.stop();
                 dispose();
                 System.exit(0);

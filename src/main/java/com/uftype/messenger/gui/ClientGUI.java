@@ -70,11 +70,14 @@ public class ClientGUI extends GUI {
         code.addActionListener(this);
         cp.add(code);
 
+        JLabel other = new JLabel("<html>Click on another user to send them a private message!<html>");
+        other.setFont(monoFont);
         otherUsers = new JPanel();
+        otherUsers.add(other);
 
         screen.add(chatPanel, BorderLayout.WEST);
-        screen.add(cp, BorderLayout.CENTER);
-        screen.add(otherUsers, BorderLayout.EAST);
+        screen.add(otherUsers, BorderLayout.CENTER);
+        screen.add(cp, BorderLayout.EAST);
         add(screen, BorderLayout.CENTER);
 
         // Make a login/register opening frame, and when it successfully authenticates, load frame
@@ -91,6 +94,18 @@ public class ClientGUI extends GUI {
             logout.setEnabled(false);
             file.setEnabled(false);
             if (Authentication.logout(dispatcher.username)) {
+                // Send logout message to the server
+                // Build and attach message with username
+                SelectionKey key = dispatcher.channel.keyFor(dispatcher.selector);
+                try {
+                    ChatMessage.Message chatMessage = Communication.buildMessage("", dispatcher.username, "ALL",
+                            key.channel(), ChatMessage.Message.ChatType.LOGOUT);
+                    key.attach(ByteBuffer.wrap(chatMessage.toByteArray()));
+                    dispatcher.doWrite(key);
+                } catch (IOException err) {
+                    err.printStackTrace();
+                }
+
                 dispatcher.stop();
                 dispose();
                 System.exit(0);
@@ -251,7 +266,7 @@ public class ClientGUI extends GUI {
 
     @Override
     public void updateUsers(ConcurrentHashMap<String, String> hosts) {
-        otherUsers.setLayout(new GridLayout(hosts.size(), 1));
+        otherUsers.setLayout(new GridLayout(hosts.size() + 1, 1));
 
         // Remove hosts that have disconnected
         for (JButton button : users.keySet()) {
