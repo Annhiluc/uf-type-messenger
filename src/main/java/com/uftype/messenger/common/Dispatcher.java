@@ -6,6 +6,7 @@ import com.uftype.messenger.gui.GUI;
 import com.uftype.messenger.proto.ChatMessage;
 
 import javax.swing.*;
+import java.awt.*;
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -151,7 +152,9 @@ public abstract class Dispatcher implements Runnable {
             }
         } catch (ConnectException e) {
             LOGGER.log(Level.WARNING, "UF TYPE server is not up.");
-            JOptionPane.showMessageDialog(gui, "UF TYPE server is not up. Please try again later.");
+            JLabel label = new JLabel("UF TYPE server is not up. Please try again later.");
+            label.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 24));
+            JOptionPane.showMessageDialog(gui, label);
             handle.channel().close();
             handle.cancel();
             ((ClientGUI) gui).login.dispose();

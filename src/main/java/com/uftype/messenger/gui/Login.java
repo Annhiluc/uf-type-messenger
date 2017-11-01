@@ -17,6 +17,7 @@ public class Login extends JFrame implements ActionListener, WindowListener {
     protected JButton submit, loginRegister;
     public UserContext loggedInUser;
     protected GUI gui;
+    private Font myFont1 = new Font(Font.MONOSPACED, Font.PLAIN, 24);
 
     public Login(GUI gui) {
         super("UF TYPE Messenger");
@@ -27,6 +28,7 @@ public class Login extends JFrame implements ActionListener, WindowListener {
         loginRegister = new JButton("Register");
         loginRegister.addActionListener(this);
         loginRegister.setEnabled(true);
+        loginRegister.setFont(myFont1);
 
         title = new JPanel(new GridLayout(3, 1));
         //Get file from resources folder
@@ -34,6 +36,7 @@ public class Login extends JFrame implements ActionListener, WindowListener {
         JLabel label = new JLabel(ii);
         JLabel welcome = new JLabel("Welcome to the UF TYPE Messenger!");
         welcome.setHorizontalAlignment(0);
+        welcome.setFont(myFont1);
         title.add(label);
         title.add(welcome);
         title.add(loginRegister);
@@ -41,9 +44,13 @@ public class Login extends JFrame implements ActionListener, WindowListener {
 
         loginPanel = new JPanel(new GridLayout(2, 1));
         JLabel userLabel = new JLabel("Username:");
+        userLabel.setFont(myFont1);
         usernameLogin = new JTextField(1);
+        usernameLogin.setFont(myFont1);
         JLabel passLabel = new JLabel("Password:");
+        passLabel.setFont(myFont1);
         passwordLogin = new JPasswordField(1);
+        passwordLogin.setFont(myFont1);
 
         loginPanel.add(userLabel);
         loginPanel.add(usernameLogin);
@@ -53,16 +60,26 @@ public class Login extends JFrame implements ActionListener, WindowListener {
 
         registerPanel = new JPanel(new GridLayout(5, 1));
         JLabel firstLabel = new JLabel("First name:");
+        firstLabel.setFont(myFont1);
         firstName = new JTextField(1);
+        firstName.setFont(myFont1);
         JLabel lastLabel = new JLabel("Last name:");
+        lastLabel.setFont(myFont1);
         lastName = new JTextField(1);
+        lastName.setFont(myFont1);
         userLabel = new JLabel("Username:");
+        userLabel.setFont(myFont1);
         usernameRegister = new JTextField(1);
+        usernameRegister.setFont(myFont1);
         passLabel = new JLabel("Password:");
+        passLabel.setFont(myFont1);
         passwordRegister = new JPasswordField(1);
+        passwordRegister.setFont(myFont1);
         // Consider adding another password field here to verify password
         JLabel emailLabel = new JLabel("Email:");
+        emailLabel.setFont(myFont1);
         email = new JTextField(1);
+        email.setFont(myFont1);
         // Consider adding another email field here to verify email
 
         registerPanel.add(firstLabel);
@@ -81,23 +98,15 @@ public class Login extends JFrame implements ActionListener, WindowListener {
         submitPanel = new JPanel(new GridLayout(1, 1));
         submit = new JButton("Submit");
         submit.addActionListener(this);
+        submit.setFont(myFont1);
         submitPanel.add(submit);
         add(submitPanel, BorderLayout.SOUTH);
-
-        // Add the file menu
-        JMenuBar menuBar = new JMenuBar();
-        JMenu menuFile = new JMenu("File");
-        JMenuItem menuItemExit = new JMenuItem("Exit");
-        menuFile.add(menuItemExit);
-        menuBar.add(menuFile);
-        // adds menu bar to the frame
-        setJMenuBar(menuBar);
 
         addWindowListener(this);
 
         // Size the frame.
         //frame.pack();
-        setSize(1200, 800);
+        setSize(1500, 1000);
 
         // Set the frame icon to an image loaded from a file.
         setIconImage(new ImageIcon(getClass().getClassLoader().getResource("type-icon.png")).getImage());
@@ -173,8 +182,10 @@ public class Login extends JFrame implements ActionListener, WindowListener {
 
     @Override
     public void windowClosing(WindowEvent e) {
+        JLabel label = new JLabel("Are you sure you want to quit?");
+        label.setFont(myFont1);
         int reply = JOptionPane.showConfirmDialog(Login.this,
-                "Are you sure you want to quit?",
+                label,
                 "Exit",
                 JOptionPane.YES_NO_OPTION,
                 JOptionPane.QUESTION_MESSAGE);

@@ -35,8 +35,10 @@ public class ClientGUI extends GUI {
 
         // Add login and logout button
         logout = new JButton("Logout");
+        logout.setFont(monoFont);
         logout.addActionListener(this);
         file = new JButton("Add File");
+        file.setFont(monoFont);
         file.addActionListener(this);
         logout.setEnabled(true);
         file.setEnabled(true);
@@ -49,6 +51,7 @@ public class ClientGUI extends GUI {
         screen = new JPanel(new GridLayout(1, 3));
 
         textArea = new RSyntaxTextArea();
+        textArea.setFont(textArea.getFont().deriveFont(24.0f));
         JPanel cp = new JPanel(new GridLayout(3, 1));
         textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JAVASCRIPT);
         textArea.setCodeFoldingEnabled(true);
@@ -56,12 +59,14 @@ public class ClientGUI extends GUI {
 
         String[] languages = {"Java", "JavaScript", "C", "C++", "C#", "JSON", "HTML", "CSS", "Python"};
         languageList = new JComboBox(languages);
+        languageList.setFont(monoFont);
         languageList.addActionListener(this);
         cp.add(languageList);
 
         cp.add(sp);
 
         code = new JButton("Send Code");
+        code.setFont(monoFont);
         code.addActionListener(this);
         cp.add(code);
 
@@ -260,6 +265,7 @@ public class ClientGUI extends GUI {
             if (!users.containsValue(host)) {
                 // Need to populate with currently logged in users
                 JButton user = new JButton(dispatcher.connectedHosts.get(host));
+                user.setFont(monoFont);
                 user.addActionListener(this); // To create a chat window with that one user
                 users.put(user, host);
 

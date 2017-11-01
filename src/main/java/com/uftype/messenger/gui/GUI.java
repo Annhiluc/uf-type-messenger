@@ -18,6 +18,7 @@ public abstract class GUI extends JFrame implements WindowListener, ActionListen
     protected StyledDocument chatText, eventText;
     public JTextField messages;
     public JTextPane chat, event;
+    protected Font monoFont = new Font(Font.MONOSPACED, Font.PLAIN, 24);
 
     public GUI(Dispatcher dispatcher, String name) {
         super(name);
@@ -28,27 +29,33 @@ public abstract class GUI extends JFrame implements WindowListener, ActionListen
         chat = new JTextPane();
         chatPanel.add(new JScrollPane(chat));
         chatText = chat.getStyledDocument();
+        chat.setFont(monoFont);
         addChat("Chat room.");
 
         // Add the chat room
         event = new JTextPane();
         chatPanel.add(new JScrollPane(event));
         eventText = event.getStyledDocument();
+        event.setFont(monoFont);
         addEvent("Events log.");
         add(chatPanel, BorderLayout.CENTER);
 
         // Add the file menu
-        JMenuBar menuBar = new JMenuBar();
+        /*JMenuBar menuBar = new JMenuBar();
         JMenu menuFile = new JMenu("File");
+        menuFile.setFont(monoFont);
         JMenuItem menuItemExit = new JMenuItem("Exit");
+        menuItemExit.setFont(monoFont);
         menuFile.add(menuItemExit);
         menuBar.add(menuFile);
         // adds menu bar to the frame
-        setJMenuBar(menuBar);
+        setJMenuBar(menuBar);*/
 
         // Add message text field
         messages = new JTextField("");
+        messages.setFont(monoFont);
         label = new JLabel("Enter a chat message: ", SwingConstants.CENTER);
+        label.setFont(monoFont);
 
         messagePanel = new JPanel(new GridLayout(2, 1));
         messagePanel.add(label);
@@ -64,7 +71,7 @@ public abstract class GUI extends JFrame implements WindowListener, ActionListen
     public void loadScreen() {
         // Size the frame.
         //frame.pack();
-        setSize(1000, 750);
+        setSize(1750, 1500);
 
         // Set the frame icon to an image loaded from a file.
         setIconImage(new ImageIcon(getClass().getClassLoader().getResource("type-icon.png")).getImage());
@@ -75,8 +82,10 @@ public abstract class GUI extends JFrame implements WindowListener, ActionListen
 
     @Override
     public void windowClosing(WindowEvent e) {
+        JLabel label = new JLabel("Are you sure you want to quit?");
+        label.setFont(monoFont);
         int reply = JOptionPane.showConfirmDialog(GUI.this,
-                "Are you sure you want to quit?",
+                label,
                 "Exit",
                 JOptionPane.YES_NO_OPTION,
                 JOptionPane.QUESTION_MESSAGE);
