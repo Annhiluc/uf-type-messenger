@@ -270,7 +270,7 @@ public class ClientGUI extends GUI {
 
         // Remove hosts that have disconnected
         for (JButton button : users.keySet()) {
-            if (!hosts.containsValue(button.getText())) {
+            if (!hosts.containsKey(users.get(button))) {
                 otherUsers.remove(button);
             }
         }
