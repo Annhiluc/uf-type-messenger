@@ -23,6 +23,10 @@ import static java.lang.System.arraycopy;
 import static java.nio.channels.SelectionKey.OP_READ;
 import static java.nio.channels.SelectionKey.OP_WRITE;
 
+/*
+Create a way to do this from commandline, in case gui is not set.
+ */
+
 /**
  * Represents the dispatcher which is employed by client and server to facilitate message sending and receiving.
  */

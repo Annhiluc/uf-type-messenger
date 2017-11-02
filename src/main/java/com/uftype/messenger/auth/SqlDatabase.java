@@ -2,7 +2,6 @@ package com.uftype.messenger.auth;
 
 import com.uftype.messenger.common.UserContext;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.sql.DriverManager;
 import java.sql.ResultSet;

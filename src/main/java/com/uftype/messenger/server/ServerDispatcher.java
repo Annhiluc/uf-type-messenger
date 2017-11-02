@@ -1,6 +1,5 @@
 package com.uftype.messenger.server;
 
-
 import com.uftype.messenger.common.Communication;
 import com.uftype.messenger.common.Dispatcher;
 import com.uftype.messenger.gui.ServerGUI;
@@ -8,7 +7,6 @@ import com.uftype.messenger.proto.ChatMessage;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.nio.channels.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -16,6 +14,10 @@ import java.util.logging.Level;
 
 import static java.nio.channels.SelectionKey.OP_ACCEPT;
 import static java.nio.channels.SelectionKey.OP_READ;
+
+/*
+Create a way to do this from commandline, in case gui is not set.
+ */
 
 public class ServerDispatcher extends Dispatcher {
     ChatMessage.Message.Builder welcome = ChatMessage.Message.newBuilder();

@@ -9,6 +9,11 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.concurrent.ConcurrentHashMap;
 
+/*
+ Consider ways to make new buildMessage based on just one method.
+ */
+
+
 /**
  * Represents methods to help build messages to send between clients and servers.
  */

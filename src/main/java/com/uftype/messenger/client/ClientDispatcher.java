@@ -17,6 +17,10 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static java.nio.channels.SelectionKey.OP_CONNECT;
 
+/*
+Create a way to do this from commandline, in case gui is not set.
+ */
+
 /**
  * Represents a client dispatcher which listens to messages and sends them to the server.
  */
