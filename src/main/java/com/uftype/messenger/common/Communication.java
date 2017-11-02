@@ -13,7 +13,6 @@ import java.util.concurrent.ConcurrentHashMap;
  Consider ways to make new buildMessage based on just one method.
  */
 
-
 /**
  * Represents methods to help build messages to send between clients and servers.
  */
@@ -60,12 +59,12 @@ public class Communication {
      * Sets up a message builder with the username, recipient, and sender of the message.
      * The text, type, and username of the message still need to be set.
      */
-    public static ChatMessage.Message.Builder initializeMessage(SelectableChannel socketChannel) throws IOException {
+    private static ChatMessage.Message.Builder initializeMessage(SelectableChannel socketChannel) throws IOException {
         ChatMessage.Message.Builder messageBuilder = ChatMessage.Message.newBuilder();
 
         SocketChannel channel;
         ServerSocketChannel serverChannel;
-        String localAddress = "", remoteAddress = "";
+        String localAddress = "";
 
         if (socketChannel != null) {
             if (socketChannel instanceof SocketChannel) {
@@ -86,14 +85,15 @@ public class Communication {
 
     /**
      * Returns a string representation of a vector of Strings.
-     *
-     * @return
      */
     public static String getString(ConcurrentHashMap<String, String> hosts) {
         StringBuilder sb = new StringBuilder();
 
         for (String host : hosts.keySet()) {
-            sb.append(host + "\t" + hosts.get(host) + "\n");
+            sb.append(host);
+            sb.append("\t");
+            sb.append(hosts.get(host));
+            sb.append("\n");
         }
 
         return sb.toString();

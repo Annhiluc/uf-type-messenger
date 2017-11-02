@@ -18,20 +18,21 @@ import java.nio.channels.SelectionKey;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ClientGUI extends GUI {
-    public JButton logout, file, code;
+    private JButton logout, file, code;
+    private RSyntaxTextArea textArea;
+    private ConcurrentHashMap<JButton, String> users; // Maps between other users and their hostnames
+    private JPanel otherUsers;
+    private JComboBox languageList;
+
     public Login login;
-    protected RSyntaxTextArea textArea;
-    protected ConcurrentHashMap<JButton, String> users; // Maps between other users and their hostnames
-    protected JPanel otherUsers, screen;
-    protected JComboBox languageList;
 
     //Create a file chooser
-    final JFileChooser fc = new JFileChooser();
+    final private JFileChooser fc = new JFileChooser();
 
     public ClientGUI(Dispatcher clientDispatcher) {
         super(clientDispatcher, "UF TYPE Messenger Client");
 
-        users = new ConcurrentHashMap<JButton, String>();
+        users = new ConcurrentHashMap<>();
 
         // Add login and logout button
         logout = new JButton("Logout");
@@ -48,7 +49,7 @@ public class ClientGUI extends GUI {
         buttonPanel.add(file);
         add(buttonPanel, BorderLayout.NORTH);
 
-        screen = new JPanel(new GridLayout(1, 3));
+        JPanel screen = new JPanel(new GridLayout(1, 3));
 
         textArea = new RSyntaxTextArea();
         textArea.setFont(textArea.getFont().deriveFont(24.0f));
@@ -58,7 +59,7 @@ public class ClientGUI extends GUI {
         RTextScrollPane sp = new RTextScrollPane(textArea);
 
         String[] languages = {"Java", "JavaScript", "C", "C++", "C#", "JSON", "HTML", "CSS", "Python"};
-        languageList = new JComboBox(languages);
+        languageList = new JComboBox<>(languages);
         languageList.setFont(monoFont);
         languageList.addActionListener(this);
         cp.add(languageList);
@@ -159,7 +160,11 @@ public class ClientGUI extends GUI {
 
                     byte[] mybytearray = new byte[(int) myFile.length()];
                     BufferedInputStream bis = new BufferedInputStream(new FileInputStream(myFile));
-                    bis.read(mybytearray, 0, mybytearray.length);
+                    int read = bis.read(mybytearray, 0, mybytearray.length);
+
+                    if (read < 0) {
+                        return; // This read operation failed
+                    }
 
                     SelectionKey key = dispatcher.channel.keyFor(dispatcher.selector);
 
@@ -195,7 +200,7 @@ public class ClientGUI extends GUI {
             }
         } else if (o == languageList) {
             JComboBox cb = (JComboBox) o;
-            String language = (String) cb.getSelectedItem();
+            String language = cb.getSelectedItem() == null ? "Java" : (String) cb.getSelectedItem();
             switch (language) {
                 case "Java":
                     textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JAVA);
@@ -242,8 +247,10 @@ public class ClientGUI extends GUI {
                     revalidate();
                     repaint();
                     break;
+                default:
+                    break;
             }
-        } else if (users.containsKey(o) && !messages.getText().equals("")) {
+        } else if (o instanceof JButton && users.containsKey(o) && !messages.getText().equals("")) {
             // Need to send specific message
             try {
                 // Get the associated key to attach message

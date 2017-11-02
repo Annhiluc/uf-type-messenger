@@ -27,9 +27,9 @@ Create a way to do this from commandline, in case gui is not set.
 public class ClientDispatcher extends Dispatcher {
     private ConcurrentLinkedQueue<ChatMessage.Message> messageQueue; // Queue of incoming messages to be processed
 
-    public ClientDispatcher(InetSocketAddress address) throws IOException {
+    ClientDispatcher(InetSocketAddress address) throws IOException {
         super(address);
-        messageQueue = new ConcurrentLinkedQueue<ChatMessage.Message>();
+        messageQueue = new ConcurrentLinkedQueue<>();
 
         // Set up GUI
         ClientGUI gui = new ClientGUI(this);
@@ -78,7 +78,7 @@ public class ClientDispatcher extends Dispatcher {
                 }
             case WHOISIN:
                 String[] hosts = message.getText().trim().split("\n");
-                ConcurrentHashMap<String, String> newHosts = new ConcurrentHashMap<String, String>();
+                ConcurrentHashMap<String, String> newHosts = new ConcurrentHashMap<>();
 
                 for (String host : hosts) {
                     String[] mapping = host.split("\t");
@@ -97,8 +97,6 @@ public class ClientDispatcher extends Dispatcher {
 
     /**
      * This will be used in a command-line case.
-     *
-     * @return
      */
     private boolean authenticateUser() {
         Scanner in = new Scanner(System.in);
@@ -120,8 +118,6 @@ public class ClientDispatcher extends Dispatcher {
 
     /**
      * This will be used in a command-line case.
-     *
-     * @return
      */
     private boolean registerUser() {
         Scanner in = new Scanner(System.in);
@@ -138,7 +134,7 @@ public class ClientDispatcher extends Dispatcher {
 
 
         if (Authentication.register(firstname, lastname, username, email, password)) {
-            UserContext user = Authentication.login(username, password);
+            Authentication.login(username, password);
             // Handle setting up the new UserContext
             return true;
         }

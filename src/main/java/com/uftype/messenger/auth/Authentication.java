@@ -17,7 +17,6 @@ public class Authentication {
     private final static Logger LOGGER = Logger.getLogger(Authentication.class.getName());
     private final static Random RANDOM = new Random();
 
-
     /**
      * Returns a UserContext if login is successful using provided credentials, null otherwise.
      */
@@ -36,16 +35,14 @@ public class Authentication {
      * Returns true if register is successful using provided credentials, false otherwise.
      */
     public static boolean register(String firstname, String lastname, String username, String email, String password) {
-        boolean isRegistered = false;
         if (database.connect()) {
             String salt = generateSalt();
             String securePassword = hashMD5(password, salt); // This secure password wil be stored in the database
 
-            isRegistered = database.register(firstname, lastname, username, email, securePassword, salt);
-            return true;
+            return database.register(firstname, lastname, username, email, securePassword, salt);
         }
 
-        return isRegistered;
+        return false;
     }
 
     /**
@@ -63,7 +60,7 @@ public class Authentication {
     /**
      * Returns MD5 hash of password and salt to be stored in database
      */
-    public static String hashMD5(String password, String salt) {
+    static String hashMD5(String password, String salt) {
         String hashed = null;
 
         try {
@@ -82,10 +79,10 @@ public class Authentication {
     /**
      * Returns a random 16 byte salt String.
      */
-    public static String generateSalt() {
+    private static String generateSalt() {
         byte[] salt = new byte[16];
         RANDOM.nextBytes(salt);
-        return salt.toString();
+        return new String(salt);
     }
 
     /**

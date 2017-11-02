@@ -36,6 +36,7 @@ public class Server extends JApplet {
             serverDispatcher.run();
         } catch (IOException e) {
             LOGGER.log(Level.WARNING, "UF TYPE server failure: " + e);
+            disconnect();
         }
     }
 
@@ -52,6 +53,8 @@ public class Server extends JApplet {
         try {
             connect(3000);
         } catch (IOException e) {
+            LOGGER.log(Level.WARNING, "UF TYPE server failure: " + e);
+            disconnect();
         }
     }
 
@@ -65,6 +68,7 @@ public class Server extends JApplet {
             Server server = new Server();
             server.init();
         } catch (IOException e) {
+            LOGGER.log(Level.WARNING, "UF TYPE server failure: " + e);
         }
     }
 }

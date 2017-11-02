@@ -58,17 +58,14 @@ public class SqlDatabase extends Database {
      * Returns true if can disconnect from the database connection, false otherwise.
      */
     @Override
-    public synchronized boolean disconnect() {
+    public synchronized void disconnect() {
         try {
             if (conn != null) {
                 conn.close(); // Close only if connection exists
             }
         } catch (SQLException e) {
             LOGGER.log(Level.WARNING, "Unable to close the database connection: " + e);
-            return false;
         }
-
-        return true;
     }
 
     /**
@@ -97,8 +94,8 @@ public class SqlDatabase extends Database {
                     "values ('" + firstname + "', '" + lastname + "', '" + username + "', '" +
                     email + "', '" + securePassword + "', '" + salt + "')";
 
-            ResultSet insertUser = stmt.executeQuery(query);
-            ResultSet commitUser = stmt.executeQuery("commit");
+            stmt.executeQuery(query);
+            stmt.executeQuery("commit");
         } catch (SQLException e) {
             LOGGER.log(Level.WARNING, "Unable to register user: " + e);
         }
@@ -125,11 +122,9 @@ public class SqlDatabase extends Database {
                 String passwordToCompare = rset.getString("password");
 
                 if (Authentication.hashMD5(password, salt).equals(passwordToCompare)) {
-                    UserContext validatedUser = new UserContext(rset.getString("first_name"),
+                    return new UserContext(rset.getString("first_name"),
                             rset.getString("last_name"), rset.getString("user_name"),
                             rset.getString("email"), UserContext.Status.LOGGED_IN);
-
-                    return validatedUser;
                 }
             }
 

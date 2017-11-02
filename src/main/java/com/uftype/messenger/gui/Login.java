@@ -9,17 +9,20 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.net.URL;
 
 public class Login extends JFrame implements ActionListener, WindowListener {
-    protected JTextField usernameLogin, usernameRegister, firstName, lastName, email;
-    protected JPasswordField passwordLogin, passwordRegister;
-    protected JPanel title, loginPanel, submitPanel, registerPanel;
-    protected JButton submit, loginRegister;
-    public UserContext loggedInUser;
-    protected GUI gui;
+    private JTextField usernameLogin, usernameRegister, firstName, lastName, email;
+    private JPasswordField passwordLogin, passwordRegister;
+    private JPanel loginPanel, registerPanel;
+    private JButton submit, loginRegister;
     private Font myFont1 = new Font(Font.MONOSPACED, Font.PLAIN, 24);
 
-    public Login(GUI gui) {
+    UserContext loggedInUser;
+
+    protected GUI gui;
+
+    Login(GUI gui) {
         super("UF TYPE Messenger");
 
         loggedInUser = null;
@@ -30,14 +33,17 @@ public class Login extends JFrame implements ActionListener, WindowListener {
         loginRegister.setEnabled(true);
         loginRegister.setFont(myFont1);
 
-        title = new JPanel(new GridLayout(3, 1));
+        JPanel title = new JPanel(new GridLayout(3, 1));
         //Get file from resources folder
-        ImageIcon ii = new ImageIcon(getClass().getClassLoader().getResource("type-logo.png"));
-        JLabel label = new JLabel(ii);
+        URL resource = getClass().getClassLoader().getResource("type-logo.png");
+        if (resource != null) {
+            ImageIcon ii = new ImageIcon(resource);
+            JLabel label = new JLabel(ii);
+            title.add(label);
+        }
         JLabel welcome = new JLabel("Welcome to the UF TYPE Messenger!");
-        welcome.setHorizontalAlignment(0);
+        welcome.setHorizontalAlignment(SwingConstants.CENTER);
         welcome.setFont(myFont1);
-        title.add(label);
         title.add(welcome);
         title.add(loginRegister);
         add(title, BorderLayout.NORTH);
@@ -95,7 +101,7 @@ public class Login extends JFrame implements ActionListener, WindowListener {
 
         // Will add this panel to frame when register button pressed
 
-        submitPanel = new JPanel(new GridLayout(1, 1));
+        JPanel submitPanel = new JPanel(new GridLayout(1, 1));
         submit = new JButton("Submit");
         submit.addActionListener(this);
         submit.setFont(myFont1);
@@ -109,8 +115,11 @@ public class Login extends JFrame implements ActionListener, WindowListener {
         setSize(1500, 1000);
 
         // Set the frame icon to an image loaded from a file.
-        setIconImage(new ImageIcon(getClass().getClassLoader().getResource("type-icon.png")).getImage());
+        URL icon = getClass().getClassLoader().getResource("type-icon.png");
 
+        if (icon != null) {
+            setIconImage(new ImageIcon(icon).getImage());
+        }
         // Show it.
         setVisible(true);
 
@@ -136,7 +145,6 @@ public class Login extends JFrame implements ActionListener, WindowListener {
                     JOptionPane.showMessageDialog(Login.this, "Incorrect credentials. Please try again.");
                     usernameLogin.setText("");
                     passwordLogin.setText("");
-                    return;
                 }
             } else {
                 // On register page
@@ -158,7 +166,6 @@ public class Login extends JFrame implements ActionListener, WindowListener {
                     email.setText("");
                     firstName.setText("");
                     lastName.setText("");
-                    return;
                 }
             }
         } else if (o == loginRegister) {
@@ -193,8 +200,6 @@ public class Login extends JFrame implements ActionListener, WindowListener {
             // Stop program
             dispose();
             System.exit(0);
-        } else {
-            return;
         }
     }
 

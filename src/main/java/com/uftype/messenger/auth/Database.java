@@ -9,8 +9,8 @@ import java.util.logging.Logger;
  * Represents a database connection for user authentication.
  */
 public abstract class Database {
-    protected Connection conn;
-    protected final static Logger LOGGER = Logger.getLogger(Database.class.getName());
+    Connection conn;
+    final static Logger LOGGER = Logger.getLogger(Database.class.getName());
 
     /**
      * Returns true if can connect to the database using the username and password
@@ -21,7 +21,7 @@ public abstract class Database {
     /**
      * Returns true if can disconnect from the database connection, false otherwise.
      */
-    public abstract boolean disconnect();
+    public abstract void disconnect();
 
     /**
      * Returns true if database successfully registers a user, false otherwise.

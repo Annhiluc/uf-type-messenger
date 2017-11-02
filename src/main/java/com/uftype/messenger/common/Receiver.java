@@ -15,9 +15,8 @@ import java.util.logging.Logger;
  * Is only used in console version of application.
  */
 public class Receiver extends Thread {
-    protected Dispatcher dispatcher; // Dispatcher to connect channel and selectors
-
-    protected final Logger LOGGER = Logger.getLogger(Receiver.class.getName());
+    private Dispatcher dispatcher; // Dispatcher to connect channel and selectors
+    private final Logger LOGGER = Logger.getLogger(Receiver.class.getName());
 
     public Receiver(Dispatcher dispatcher) {
         this.dispatcher = dispatcher;
@@ -29,7 +28,7 @@ public class Receiver extends Thread {
     public void run() {
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
         try {
-            while (dispatcher.isUp) {
+            while (dispatcher.getIsUp()) {
                 String message = in.readLine();
 
                 // Get the associated key to attach message

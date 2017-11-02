@@ -31,9 +31,10 @@ Create a way to do this from commandline, in case gui is not set.
  * Represents the dispatcher which is employed by client and server to facilitate message sending and receiving.
  */
 public abstract class Dispatcher implements Runnable {
-    protected ByteBuffer buffer; // Buffer for handling messages
+    private ByteBuffer buffer; // Buffer for handling messages
+    private volatile boolean isUp; // True if running
+
     protected InetSocketAddress address; // IP address
-    protected volatile boolean isUp; // True if running
 
     public Selector selector; // Selector to demultiplex incoming channels
     public SelectableChannel channel; // Current channel
@@ -49,17 +50,22 @@ public abstract class Dispatcher implements Runnable {
         this.buffer = ByteBuffer.allocate(1048567);
         this.channel = getChannel(address);
         this.selector = getSelector();
-        this.connectedHosts = new ConcurrentHashMap<String, String>();
+        this.connectedHosts = new ConcurrentHashMap<>();
         this.isUp = true;
     }
 
     /**
      * Set GUI object for the dispatcher
-     *
-     * @param gui
      */
-    public void setGUI(GUI gui) {
+    protected void setGUI(GUI gui) {
         this.gui = gui;
+    }
+
+    /**
+     * Returns whether the dispatcher is up or not.
+     */
+    boolean getIsUp() {
+        return isUp;
     }
 
     /**
@@ -133,7 +139,7 @@ public abstract class Dispatcher implements Runnable {
     /**
      * Connect to SocketChannel.
      */
-    protected void doConnect(SelectionKey handle) throws IOException {
+    private void doConnect(SelectionKey handle) throws IOException {
         try {
             SocketChannel socketChannel = (SocketChannel) handle.channel();
 
@@ -144,8 +150,13 @@ public abstract class Dispatcher implements Runnable {
 
                 SelectionKey key = channel.keyFor(selector);
 
-                while (username == null || username.equals("")) {
-                    // Waiting loop
+                try {
+                    while (username == null || username.equals("")) {
+                        // Waiting loop
+                        Thread.sleep(1000);
+                    }
+                } catch (InterruptedException e) {
+                    // Do nothing
                 }
 
                 // Build and attach message with username
@@ -174,7 +185,7 @@ public abstract class Dispatcher implements Runnable {
     /**
      * Perform a read operation on the incoming data. Print data to the screen.
      */
-    protected void doRead(SelectionKey handle) throws IOException {
+    private void doRead(SelectionKey handle) throws IOException {
         SocketChannel socketChannel = (SocketChannel) handle.channel();
         buffer.clear();
 
@@ -242,7 +253,7 @@ public abstract class Dispatcher implements Runnable {
                     // If image, put it in the chat message
                     if (message.getText().endsWith("jpg") || message.getText().endsWith("png")) {
                         gui.addEvent(username + " sent image: ");
-                        gui.event.insertIcon(new ImageIcon(message.getText()));
+                        gui.addImage(new ImageIcon(message.getText()));
                         gui.addChat("\n"); // Makes it on a new line
                     }
                     gui.addEvent("File downloaded (" + mybytearray.length + " bytes read)");
@@ -255,7 +266,7 @@ public abstract class Dispatcher implements Runnable {
                 }
                 break;
             case CODE:
-                CodeGUI code = new CodeGUI(message.getUsername(), message.getText(), message.getLanguage());
+                new CodeGUI(message.getUsername(), message.getText(), message.getLanguage());
                 formatted = message.getUsername() + ": sent code\n" + message.getText();
                 gui.addEvent(formatted);
                 break;

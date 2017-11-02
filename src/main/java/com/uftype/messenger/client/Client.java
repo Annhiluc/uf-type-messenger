@@ -35,6 +35,7 @@ public class Client extends JApplet {
             clientDispatcher.run();
         } catch (IOException e) {
             LOGGER.log(Level.WARNING, "UF TYPE client failure: " + e);
+            disconnect();
         }
     }
 
@@ -51,6 +52,8 @@ public class Client extends JApplet {
         try {
             connect("127.0.0.1", 3000);
         } catch (IOException e) {
+            LOGGER.log(Level.WARNING, "UF TYPE client failure: " + e);
+            disconnect();
         }
     }
 
@@ -64,6 +67,7 @@ public class Client extends JApplet {
             Client client = new Client();
             client.init();
         } catch (IOException e) {
+            LOGGER.log(Level.WARNING, "UF TYPE client failure: " + e);
         }
     }
 }

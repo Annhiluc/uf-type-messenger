@@ -4,11 +4,12 @@ package com.uftype.messenger.common;
  * Represents user information when connecting to a server.
  */
 public class UserContext {
-    public String firstname;
-    public String lastname;
+    private String firstname;
+    private String lastname;
+    private String email;
+    private Status status;
+
     public String username;
-    public String email;
-    public Status status;
 
     public enum Status {
         LOGGED_IN,

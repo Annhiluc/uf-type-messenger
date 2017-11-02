@@ -8,8 +8,7 @@ import java.awt.*;
 import java.util.HashMap;
 
 public class CodeGUI extends JFrame {
-    public RSyntaxTextArea textArea;
-    protected static final HashMap<String, String> languageMap = new HashMap<String, String>();
+    private static final HashMap<String, String> languageMap = new HashMap<>();
 
     static {
         languageMap.put("C", "c");
@@ -27,7 +26,7 @@ public class CodeGUI extends JFrame {
         super("Code from " + sender + " in " + language);
         JPanel cp = new JPanel(new GridLayout(1, 1));
 
-        textArea = new RSyntaxTextArea(20, 60);
+        RSyntaxTextArea textArea = new RSyntaxTextArea(20, 60);
         textArea.setSyntaxEditingStyle("text/" + languageMap.get(language));
         textArea.setCodeFoldingEnabled(true);
         textArea.setText(code);

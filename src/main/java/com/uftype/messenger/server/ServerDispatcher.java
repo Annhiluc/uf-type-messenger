@@ -20,10 +20,10 @@ Create a way to do this from commandline, in case gui is not set.
  */
 
 public class ServerDispatcher extends Dispatcher {
-    ChatMessage.Message.Builder welcome = ChatMessage.Message.newBuilder();
-    ConcurrentHashMap<SocketChannel, String> connections = new ConcurrentHashMap<>();
+    private ChatMessage.Message.Builder welcome = ChatMessage.Message.newBuilder();
+    private ConcurrentHashMap<SocketChannel, String> connections = new ConcurrentHashMap<>();
 
-    public ServerDispatcher(InetSocketAddress address) throws IOException {
+    ServerDispatcher(InetSocketAddress address) throws IOException {
         super(address);
         username = "UF TYPE Server";
         welcome.setText("Welcome to UF TYPE Messenger Chat!");
@@ -119,7 +119,7 @@ public class ServerDispatcher extends Dispatcher {
                 if (!message.getRecipient().equals("ALL")) {
                     for (SelectionKey sk : selector.keys()) {
                         if (sk.channel() instanceof SocketChannel &&
-                                connections.get((SocketChannel) (sk.channel())).equals(message.getRecipient())) {
+                                connections.get(sk.channel()).equals(message.getRecipient())) {
                             sk.attach(ByteBuffer.wrap(message.toByteArray()));
                             doWrite(sk);
                             gui.addEvent("Send private message to " + message.getRecipient());
@@ -159,7 +159,9 @@ public class ServerDispatcher extends Dispatcher {
                 doWriteAll(key);
 
                 // Remove from connections
-                connections.remove(key);
+                if (key.channel() instanceof SocketChannel) {
+                    connections.remove(key.channel());
+                }
             default:
                 super.handleData(message);
                 break;

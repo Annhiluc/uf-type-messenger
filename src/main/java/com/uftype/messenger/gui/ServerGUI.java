@@ -14,7 +14,7 @@ import java.nio.channels.SelectionKey;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ServerGUI extends GUI {
-    public JButton start;
+    private JButton start;
 
     public ServerGUI(Dispatcher serverDispatcher) {
         super(serverDispatcher, "UF TYPE Messenger Server");
@@ -52,7 +52,6 @@ public class ServerGUI extends GUI {
                 dispatcher.stop();
                 dispose();
                 System.exit(0);
-                return;
             }
         } else if (o == messages && !messages.getText().equals("")) {
             try {
