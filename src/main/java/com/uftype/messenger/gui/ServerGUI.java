@@ -14,7 +14,7 @@ import java.nio.channels.SelectionKey;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ServerGUI extends GUI {
-    private JButton start;
+    private JButton start;      // Start and stop button
 
     public ServerGUI(Dispatcher serverDispatcher) {
         super(serverDispatcher, "UF TYPE Messenger Server");
@@ -27,14 +27,15 @@ public class ServerGUI extends GUI {
         startPanel.add(start);
         add(start, BorderLayout.NORTH);
 
+        // Load screen
         loadScreen();
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         Object o = e.getSource();
-        // Stop server if it is running
         if (o == start) {
+            // Stop server if it is running
             if (start.getText().equals("Stop")) {
                 // Need to alert other clients
                 try {
@@ -54,6 +55,7 @@ public class ServerGUI extends GUI {
                 System.exit(0);
             }
         } else if (o == messages && !messages.getText().equals("")) {
+            // Write message to the message panel
             try {
                 // Get the associated key to attach message
                 SelectionKey key = dispatcher.channel.keyFor(dispatcher.selector);
@@ -74,6 +76,6 @@ public class ServerGUI extends GUI {
 
     @Override
     public void updateUsers(ConcurrentHashMap<String, String> users) {
-
+        // Will not be implemented in the ServerGUI
     }
 }

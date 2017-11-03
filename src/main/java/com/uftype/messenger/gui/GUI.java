@@ -11,14 +11,17 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.net.URL;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Logger;
 
 public abstract class GUI extends JFrame implements WindowListener, ActionListener {
-    Dispatcher dispatcher;                // Dispatcher (either Client or Server) to handle writing messages
-    JPanel chatPanel;       // Panel to show the chat and message panel
     private StyledDocument chatText, eventText;   // Text documents holding text for event and chat panels
-    Font monoFont = new Font(Font.MONOSPACED, Font.PLAIN, 24);
-    JTextField messages;
-    JTextPane event;
+    protected Logger logger = Logger.getLogger(GUI.class.getName());   // Logger to keep track of GUI events
+
+    Dispatcher dispatcher;          // Dispatcher (either Client or Server) to handle writing messages
+    JPanel chatPanel;               // Panel to show the chat and message panel
+    JTextField messages;            // Textfield to input messages
+    JTextPane event;                // Event pane to show event messages
+    Font monoFont = new Font(Font.MONOSPACED, Font.PLAIN, 24);   // Special font
 
     GUI(Dispatcher dispatcher, String name) {
         super(name);
@@ -32,7 +35,16 @@ public abstract class GUI extends JFrame implements WindowListener, ActionListen
         chat.setFont(monoFont);
         addChat("Chat room.");
 
-        // Add the chat room
+        // Add message text panel
+        JPanel messagePanel = new JPanel(new GridLayout(2, 1));messages = new JTextField("");
+        messages.setFont(monoFont);
+        JLabel messageLabel = new JLabel("Enter a chat message: ", SwingConstants.CENTER);
+        messageLabel.setFont(monoFont);
+        messagePanel.add(messageLabel);
+        messagePanel.add(messages);
+        chatPanel.add(messagePanel);
+
+        // Add the event pane
         event = new JTextPane();
         chatPanel.add(new JScrollPane(event));
         eventText = event.getStyledDocument();
@@ -40,37 +52,18 @@ public abstract class GUI extends JFrame implements WindowListener, ActionListen
         addEvent("Events log.");
         add(chatPanel, BorderLayout.CENTER);
 
-        // Add the file menu
-        /*JMenuBar menuBar = new JMenuBar();
-        JMenu menuFile = new JMenu("File");
-        menuFile.setFont(monoFont);
-        JMenuItem menuItemExit = new JMenuItem("Exit");
-        menuItemExit.setFont(monoFont);
-        menuFile.add(menuItemExit);
-        menuBar.add(menuFile);
-        // adds menu bar to the frame
-        setJMenuBar(menuBar);*/
-
-        // Add message text field
-        messages = new JTextField("");
-        messages.setFont(monoFont);
-        JLabel messageLabel = new JLabel("Enter a chat message: ", SwingConstants.CENTER);
-        messageLabel.setFont(monoFont);
-
-        JPanel messagePanel = new JPanel(new GridLayout(2, 1));
-        messagePanel.add(messageLabel);
-        messagePanel.add(messages);
-        chatPanel.add(messagePanel);
-
+        // Add action listeners for message text field and frame
         messages.addActionListener(this);
         addWindowListener(this);
 
         setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE); // Will not close unless prompted
     }
 
+    /**
+     * Load the screen.
+     */
     void loadScreen() {
         // Size the frame.
-        //frame.pack();
         setSize(1750, 1500);
 
         // Set the frame icon to an image loaded from a file.
@@ -84,10 +77,16 @@ public abstract class GUI extends JFrame implements WindowListener, ActionListen
         setVisible(true);
     }
 
+    /**
+     * Add label to verify exit.
+     */
     @Override
     public void windowClosing(WindowEvent e) {
+        // Create label to prompt when users try to close.
         JLabel label = new JLabel("Are you sure you want to quit?");
         label.setFont(monoFont);
+
+        // Open confirm dialog with label
         int reply = JOptionPane.showConfirmDialog(GUI.this,
                 label,
                 "Exit",
@@ -101,6 +100,9 @@ public abstract class GUI extends JFrame implements WindowListener, ActionListen
         }
     }
 
+    /**
+     * Add chat to the chatText message text pane.
+     */
     public void addChat(String message) {
         try {
             chatText.insertString(chatText.getLength(), message + "\n", null);
@@ -109,6 +111,9 @@ public abstract class GUI extends JFrame implements WindowListener, ActionListen
         }
     }
 
+    /**
+     * Add event to the eventText text pane.
+     */
     public void addEvent(String message) {
         try {
             eventText.insertString(eventText.getLength(), message + "\n", null);
@@ -117,6 +122,9 @@ public abstract class GUI extends JFrame implements WindowListener, ActionListen
         }
     }
 
+    /**
+     * Add image to the event panel.
+     */
     public void addImage(ImageIcon image) {
         event.insertIcon(image);
     }

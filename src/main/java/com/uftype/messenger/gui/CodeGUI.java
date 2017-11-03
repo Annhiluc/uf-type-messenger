@@ -8,6 +8,7 @@ import java.awt.*;
 import java.util.HashMap;
 
 public class CodeGUI extends JFrame {
+    // Map between languages and new syntax pane
     private static final HashMap<String, String> languageMap = new HashMap<>();
 
     static {
@@ -26,6 +27,7 @@ public class CodeGUI extends JFrame {
         super("Code from " + sender + " in " + language);
         JPanel cp = new JPanel(new GridLayout(1, 1));
 
+        // Set the editing style depending on the type of language
         RSyntaxTextArea textArea = new RSyntaxTextArea(20, 60);
         textArea.setSyntaxEditingStyle("text/" + languageMap.get(language));
         textArea.setCodeFoldingEnabled(true);
@@ -33,6 +35,7 @@ public class CodeGUI extends JFrame {
         RTextScrollPane sp = new RTextScrollPane(textArea);
         cp.add(sp);
 
+        // Set content and set visible
         setContentPane(cp);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         pack();

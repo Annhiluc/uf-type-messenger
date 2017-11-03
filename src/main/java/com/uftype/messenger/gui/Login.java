@@ -12,15 +12,15 @@ import java.awt.event.WindowListener;
 import java.net.URL;
 
 public class Login extends JFrame implements ActionListener, WindowListener {
-    private JTextField usernameLogin, usernameRegister, firstName, lastName, email;
-    private JPasswordField passwordLogin, passwordRegister;
-    private JPanel loginPanel, registerPanel;
-    private JButton submit, loginRegister;
-    private Font myFont1 = new Font(Font.MONOSPACED, Font.PLAIN, 24);
+    private JTextField usernameLogin, usernameRegister, firstName, lastName, email;     // Text field for registration
+    private JPasswordField passwordLogin, passwordRegister;              // Password fields for login and registration
+    private JPanel loginPanel, registerPanel;                            // Panel for login and for registration
+    private JButton submit, loginRegister;                               // Button to submit the login information
+    private Font monoFont = new Font(Font.MONOSPACED, Font.PLAIN, 24);              // Special font
 
-    UserContext loggedInUser;
+    UserContext loggedInUser;       // Logged in user context
 
-    protected GUI gui;
+    protected GUI gui;              // Gui screen
 
     Login(GUI gui) {
         super("UF TYPE Messenger");
@@ -28,11 +28,13 @@ public class Login extends JFrame implements ActionListener, WindowListener {
         loggedInUser = null;
         this.gui = gui;
 
+        // Add login and register button
         loginRegister = new JButton("Register");
         loginRegister.addActionListener(this);
         loginRegister.setEnabled(true);
-        loginRegister.setFont(myFont1);
+        loginRegister.setFont(monoFont);
 
+        // Add logo and title button
         JPanel title = new JPanel(new GridLayout(3, 1));
         //Get file from resources folder
         URL resource = getClass().getClassLoader().getResource("type-logo.png");
@@ -43,20 +45,21 @@ public class Login extends JFrame implements ActionListener, WindowListener {
         }
         JLabel welcome = new JLabel("Welcome to the UF TYPE Messenger!");
         welcome.setHorizontalAlignment(SwingConstants.CENTER);
-        welcome.setFont(myFont1);
+        welcome.setFont(monoFont);
         title.add(welcome);
         title.add(loginRegister);
         add(title, BorderLayout.NORTH);
 
+        // Login panel with username and password
         loginPanel = new JPanel(new GridLayout(2, 1));
         JLabel userLabel = new JLabel("Username:");
-        userLabel.setFont(myFont1);
+        userLabel.setFont(monoFont);
         usernameLogin = new JTextField(1);
-        usernameLogin.setFont(myFont1);
+        usernameLogin.setFont(monoFont);
         JLabel passLabel = new JLabel("Password:");
-        passLabel.setFont(myFont1);
+        passLabel.setFont(monoFont);
         passwordLogin = new JPasswordField(1);
-        passwordLogin.setFont(myFont1);
+        passwordLogin.setFont(monoFont);
 
         loginPanel.add(userLabel);
         loginPanel.add(usernameLogin);
@@ -64,28 +67,29 @@ public class Login extends JFrame implements ActionListener, WindowListener {
         loginPanel.add(passwordLogin);
         add(loginPanel, BorderLayout.CENTER);
 
+        // Register panel with name, username, password, email
         registerPanel = new JPanel(new GridLayout(5, 1));
         JLabel firstLabel = new JLabel("First name:");
-        firstLabel.setFont(myFont1);
+        firstLabel.setFont(monoFont);
         firstName = new JTextField(1);
-        firstName.setFont(myFont1);
+        firstName.setFont(monoFont);
         JLabel lastLabel = new JLabel("Last name:");
-        lastLabel.setFont(myFont1);
+        lastLabel.setFont(monoFont);
         lastName = new JTextField(1);
-        lastName.setFont(myFont1);
+        lastName.setFont(monoFont);
         userLabel = new JLabel("Username:");
-        userLabel.setFont(myFont1);
+        userLabel.setFont(monoFont);
         usernameRegister = new JTextField(1);
-        usernameRegister.setFont(myFont1);
+        usernameRegister.setFont(monoFont);
         passLabel = new JLabel("Password:");
-        passLabel.setFont(myFont1);
+        passLabel.setFont(monoFont);
         passwordRegister = new JPasswordField(1);
-        passwordRegister.setFont(myFont1);
+        passwordRegister.setFont(monoFont);
         // Consider adding another password field here to verify password
         JLabel emailLabel = new JLabel("Email:");
-        emailLabel.setFont(myFont1);
+        emailLabel.setFont(monoFont);
         email = new JTextField(1);
-        email.setFont(myFont1);
+        email.setFont(monoFont);
         // Consider adding another email field here to verify email
 
         registerPanel.add(firstLabel);
@@ -104,14 +108,13 @@ public class Login extends JFrame implements ActionListener, WindowListener {
         JPanel submitPanel = new JPanel(new GridLayout(1, 1));
         submit = new JButton("Submit");
         submit.addActionListener(this);
-        submit.setFont(myFont1);
+        submit.setFont(monoFont);
         submitPanel.add(submit);
         add(submitPanel, BorderLayout.SOUTH);
 
         addWindowListener(this);
 
         // Size the frame.
-        //frame.pack();
         setSize(1500, 1000);
 
         // Set the frame icon to an image loaded from a file.
@@ -131,6 +134,7 @@ public class Login extends JFrame implements ActionListener, WindowListener {
         Object o = e.getSource();
 
         if (o == submit) {
+            // Either login or register
             if (loginRegister.getText().equals("Register")) {
                 // On login page
                 String user = usernameLogin.getText().trim();
@@ -169,6 +173,7 @@ public class Login extends JFrame implements ActionListener, WindowListener {
                 }
             }
         } else if (o == loginRegister) {
+            // Login or register
             if (loginRegister.getText().equals("Register")) {
                 // Switch to register page with fields for name, username, etc.
                 remove(loginPanel);
@@ -187,10 +192,16 @@ public class Login extends JFrame implements ActionListener, WindowListener {
         }
     }
 
+    /**
+     * Add label to verify exit.
+     */
     @Override
     public void windowClosing(WindowEvent e) {
+        // Create label to prompt when users try to close.
         JLabel label = new JLabel("Are you sure you want to quit?");
-        label.setFont(myFont1);
+        label.setFont(monoFont);
+
+        // Open confirm dialog with label
         int reply = JOptionPane.showConfirmDialog(Login.this,
                 label,
                 "Exit",
@@ -202,7 +213,6 @@ public class Login extends JFrame implements ActionListener, WindowListener {
             System.exit(0);
         }
     }
-
 
     @Override
     public void windowOpened(WindowEvent e) {

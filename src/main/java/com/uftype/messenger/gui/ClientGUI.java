@@ -16,15 +16,16 @@ import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
 
 public class ClientGUI extends GUI {
-    private JButton logout, file, code;
-    private RSyntaxTextArea textArea;
+    private JButton logout, file, code;         // Buttons to represent logout, adding a file, and sending code
+    private RSyntaxTextArea textArea;           // Syntax text box for code
     private ConcurrentHashMap<JButton, String> users; // Maps between other users and their hostnames
-    private JPanel otherUsers;
-    private JComboBox languageList;
+    private JPanel otherUsers;                  // Panel showing buttons of other users
+    private JComboBox languageList;             // Language list to choose language
 
-    public Login login;
+    public Login login;                         // Login screen
 
     //Create a file chooser
     final private JFileChooser fc = new JFileChooser();
@@ -35,6 +36,7 @@ public class ClientGUI extends GUI {
         users = new ConcurrentHashMap<>();
 
         // Add login and logout button
+        JPanel buttonPanel = new JPanel();
         logout = new JButton("Logout");
         logout.setFont(monoFont);
         logout.addActionListener(this);
@@ -43,14 +45,17 @@ public class ClientGUI extends GUI {
         file.addActionListener(this);
         logout.setEnabled(true);
         file.setEnabled(true);
-
-        JPanel buttonPanel = new JPanel();
         buttonPanel.add(logout);
         buttonPanel.add(file);
         add(buttonPanel, BorderLayout.NORTH);
 
-        JPanel screen = new JPanel(new GridLayout(1, 3));
+        // Label to demonstrate for other users
+        JLabel other = new JLabel("<html>Click on another user to send them a private message!<html>");
+        other.setFont(monoFont);
+        otherUsers = new JPanel();
+        otherUsers.add(other);
 
+        // Add code syntax text pane
         textArea = new RSyntaxTextArea();
         textArea.setFont(textArea.getFont().deriveFont(24.0f));
         JPanel cp = new JPanel(new GridLayout(3, 1));
@@ -58,24 +63,22 @@ public class ClientGUI extends GUI {
         textArea.setCodeFoldingEnabled(true);
         RTextScrollPane sp = new RTextScrollPane(textArea);
 
+        // Add languages for code syntax
         String[] languages = {"Java", "JavaScript", "C", "C++", "C#", "JSON", "HTML", "CSS", "Python"};
         languageList = new JComboBox<>(languages);
         languageList.setFont(monoFont);
         languageList.addActionListener(this);
         cp.add(languageList);
-
         cp.add(sp);
 
+        // Button to send code to another user
         code = new JButton("Send Code");
         code.setFont(monoFont);
         code.addActionListener(this);
         cp.add(code);
 
-        JLabel other = new JLabel("<html>Click on another user to send them a private message!<html>");
-        other.setFont(monoFont);
-        otherUsers = new JPanel();
-        otherUsers.add(other);
-
+        // Add to the screen all the components
+        JPanel screen = new JPanel(new GridLayout(1, 3));
         screen.add(chatPanel, BorderLayout.WEST);
         screen.add(otherUsers, BorderLayout.CENTER);
         screen.add(cp, BorderLayout.EAST);
@@ -91,9 +94,9 @@ public class ClientGUI extends GUI {
 
         if (o == logout) {
             // Do logout procedures
-
             logout.setEnabled(false);
             file.setEnabled(false);
+
             if (Authentication.logout(dispatcher.username)) {
                 // Send logout message to the server
                 // Build and attach message with username
@@ -104,7 +107,7 @@ public class ClientGUI extends GUI {
                     key.attach(ByteBuffer.wrap(chatMessage.toByteArray()));
                     dispatcher.doWrite(key);
                 } catch (IOException err) {
-                    err.printStackTrace();
+                    logger.log(Level.WARNING, err.toString());
                 }
 
                 dispatcher.stop();
@@ -112,7 +115,7 @@ public class ClientGUI extends GUI {
                 System.exit(0);
             } else {
                 // Something failed, quit application
-                System.out.println("Error logging out of the application.");
+                logger.log(Level.WARNING, "Error logging out of the application.");
                 dispatcher.stop();
                 dispose();
                 System.exit(1);
@@ -130,7 +133,7 @@ public class ClientGUI extends GUI {
                 addChat(dispatcher.username + ": " + messages.getText());
                 messages.setText(""); // Clear message
             } catch (IOException err) {
-                err.printStackTrace();
+                logger.log(Level.WARNING, err.toString());
             }
         } else if (o == code && !textArea.getText().equals("")) {
             try {
@@ -146,7 +149,7 @@ public class ClientGUI extends GUI {
                 addEvent(dispatcher.username + ": sent code snippet");
                 textArea.setText(""); // Clear message
             } catch (IOException err) {
-                err.printStackTrace();
+                logger.log(Level.WARNING, err.toString());
             }
         } else if (o == file) {
             // Transfer file here
@@ -162,19 +165,14 @@ public class ClientGUI extends GUI {
                     BufferedInputStream bis = new BufferedInputStream(new FileInputStream(myFile));
                     int read = bis.read(mybytearray, 0, mybytearray.length);
 
-                    if (read < 0) {
+                    // Handle files which are > 14000 bits
+                    if (read < 0 || myFile.length() > 14000) {
+                        addEvent("Please send files that are less than 14KB.");
                         return; // This read operation failed
                     }
 
-                    SelectionKey key = dispatcher.channel.keyFor(dispatcher.selector);
-
-                    // Handle files which are > 14000 bits
-                    if (myFile.length() > 14000) {
-                        addEvent("Please send files that are less than 14KB.");
-                        return;
-                    }
-
                     // Send file message
+                    SelectionKey key = dispatcher.channel.keyFor(dispatcher.selector);
                     ChatMessage.Message fileRequest = Communication.buildMessage(myFile.getName(), mybytearray,
                             "ALL", dispatcher.username, null, key.channel(),
                             ChatMessage.Message.ChatType.FILE);
@@ -196,60 +194,46 @@ public class ClientGUI extends GUI {
                     addEvent("Unable to choose that file. Please try again.");
                 }
             } catch (IOException err) {
-                err.printStackTrace();
+                logger.log(Level.WARNING, err.toString());
             }
         } else if (o == languageList) {
+            // Change RSyntaxPane code for syntax highlighting.
             JComboBox cb = (JComboBox) o;
             String language = cb.getSelectedItem() == null ? "Java" : (String) cb.getSelectedItem();
             switch (language) {
                 case "Java":
                     textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JAVA);
-                    revalidate();
-                    repaint();
                     break;
                 case "JavaScript":
                     textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JAVASCRIPT);
-                    revalidate();
-                    repaint();
                     break;
                 case "C":
                     textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_C);
-                    revalidate();
-                    repaint();
                     break;
                 case "C++":
                     textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_CSHARP);
-                    revalidate();
-                    repaint();
                     break;
                 case "C#":
                     textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS);
-                    revalidate();
-                    repaint();
                     break;
                 case "JSON":
                     textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JSON);
-                    revalidate();
-                    repaint();
                     break;
                 case "HTML":
                     textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_HTML);
-                    revalidate();
-                    repaint();
                     break;
                 case "CSS":
                     textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_CSS);
-                    revalidate();
-                    repaint();
                     break;
                 case "Python":
                     textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_PYTHON);
-                    revalidate();
-                    repaint();
                     break;
                 default:
                     break;
             }
+
+            revalidate();
+            repaint();
         } else if (o instanceof JButton && users.containsKey(o) && !messages.getText().equals("")) {
             // Need to send specific message
             try {
@@ -271,6 +255,9 @@ public class ClientGUI extends GUI {
         }
     }
 
+    /**
+     * Update the users showing in the user panel.
+     */
     @Override
     public void updateUsers(ConcurrentHashMap<String, String> hosts) {
         otherUsers.setLayout(new GridLayout(hosts.size() + 1, 1));
@@ -300,6 +287,9 @@ public class ClientGUI extends GUI {
         setVisible(true);
     }
 
+    /**
+     * When a chat gets added to the chat panel, play an audio sound.
+     */
     @Override
     public void addChat(String message) {
         super.addChat(message);
@@ -312,9 +302,9 @@ public class ClientGUI extends GUI {
             clip.open(audioInputStream);
             clip.start();
         } catch (UnsupportedAudioFileException e) {
-            System.out.println("Unable to read file type.");
+            logger.log(Level.WARNING, "Unable to read file type.");
         } catch (IOException e) {
-            System.out.println("Unable to find file.");
+            logger.log(Level.WARNING, "Unable to find file.");
         } catch (LineUnavailableException e) {
             // Do nothing
         }

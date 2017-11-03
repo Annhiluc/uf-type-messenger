@@ -38,7 +38,7 @@ public class SqlDatabase extends Database {
         try {
             properties.load(getClass().getClassLoader().getResourceAsStream("db.properties"));
         } catch (IOException e) {
-            System.out.println("Unable to read the database properties file: " + e);
+            LOGGER.log(Level.WARNING, "Unable to read the database properties file: " + e);
             return false;
         }
 
