@@ -102,7 +102,8 @@ public class ClientGUI extends GUI {
                 // Build and attach message with username
                 SelectionKey key = dispatcher.channel.keyFor(dispatcher.selector);
                 try {
-                    ChatMessage.Message chatMessage = Communication.buildMessage("", dispatcher.username, "ALL",
+                    ChatMessage.Message chatMessage = Communication.buildMessage(
+                            "", dispatcher.username, "ALL",
                             key.channel(), ChatMessage.Message.ChatType.LOGOUT);
                     key.attach(ByteBuffer.wrap(chatMessage.toByteArray()));
                     dispatcher.doWrite(key);

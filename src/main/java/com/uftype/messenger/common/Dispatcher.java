@@ -89,7 +89,7 @@ public abstract class Dispatcher implements Runnable {
             }
             selector.close();
         } catch (ClosedSelectorException e) {
-            LOGGER.log(Level.WARNING, "UF TYPE server closed connection.");
+            LOGGER.log(Level.WARNING, "UF TYPE closed connection.");
         } catch (IOException e) {
             LOGGER.log(Level.WARNING, "UF TYPE stop failure: " + e);
         }
@@ -119,7 +119,7 @@ public abstract class Dispatcher implements Runnable {
                     }
                 }
             } catch (ClosedSelectorException e) {
-                gui.addChat("UF TYPE server closed connection.");
+                gui.addChat("UF TYPE closed connection.");
             } catch (Exception e) {
                 LOGGER.log(Level.WARNING, "UF TYPE dispatcher failure: " + e);
                 stop();
