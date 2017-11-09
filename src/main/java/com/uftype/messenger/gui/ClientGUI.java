@@ -6,6 +6,7 @@ import com.uftype.messenger.common.Dispatcher;
 import com.uftype.messenger.proto.ChatMessage;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
+import org.fife.ui.rsyntaxtextarea.TextEditorPane;
 import org.fife.ui.rtextarea.RTextScrollPane;
 
 import javax.sound.sampled.*;
@@ -56,10 +57,10 @@ public class ClientGUI extends GUI {
         otherUsers.add(other);
 
         // Add code syntax text pane
-        textArea = new RSyntaxTextArea();
+        textArea = new TextEditorPane(TextEditorPane.INSERT_MODE);
         textArea.setFont(textArea.getFont().deriveFont(24.0f));
         JPanel cp = new JPanel(new GridLayout(3, 1));
-        textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JAVASCRIPT);
+        textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JAVA);
         textArea.setCodeFoldingEnabled(true);
         RTextScrollPane sp = new RTextScrollPane(textArea);
 
