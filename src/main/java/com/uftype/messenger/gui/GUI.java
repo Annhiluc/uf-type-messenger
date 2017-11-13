@@ -30,6 +30,7 @@ public abstract class GUI extends JFrame implements WindowListener, ActionListen
         // Add the chat room
         chatPanel = new JPanel(new GridLayout(3, 1));
         JTextPane chat = new JTextPane();
+        chat.setEditable(false);
         chatPanel.add(new JScrollPane(chat));
         chatText = chat.getStyledDocument();
         chat.setFont(monoFont);
@@ -50,6 +51,7 @@ public abstract class GUI extends JFrame implements WindowListener, ActionListen
         eventText = event.getStyledDocument();
         event.setFont(monoFont);
         addEvent("Events log.");
+        event.setEditable(false);
         add(chatPanel, BorderLayout.CENTER);
 
         // Add action listeners for message text field and frame

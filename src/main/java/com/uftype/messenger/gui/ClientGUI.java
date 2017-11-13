@@ -11,6 +11,7 @@ import org.fife.ui.rtextarea.RTextScrollPane;
 
 import javax.sound.sampled.*;
 import javax.swing.*;
+import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
@@ -25,6 +26,8 @@ public class ClientGUI extends GUI {
     private ConcurrentHashMap<JButton, String> users; // Maps between other users and their hostnames
     private JPanel otherUsers;                  // Panel showing buttons of other users
     private JComboBox languageList;             // Language list to choose language
+    private JMenuItem menuChat, menuCode;           // Menu options to change screens from code to chat
+    private JPanel chatScreen, codeScreen;      // Screen to hold the chat and code windows
 
     public Login login;                         // Login screen
 
@@ -56,6 +59,23 @@ public class ClientGUI extends GUI {
         otherUsers = new JPanel();
         otherUsers.add(other);
 
+        // Add the file menu
+        JMenuBar menuBar = new JMenuBar();
+        JMenu menuWindow = new JMenu("Window");
+        menuWindow.setFont(monoFont);
+        menuChat = new JMenuItem("Chat");
+        menuChat.setFont(monoFont);
+        menuCode = new JMenuItem("Code");
+        menuCode.setFont(monoFont);
+        menuWindow.add(menuChat);
+        menuWindow.add(menuCode);
+        menuBar.add(menuWindow);
+        // adds menu bar to the frame
+        setJMenuBar(menuBar);
+
+        menuChat.addActionListener(this);
+        menuCode.addActionListener(this);
+
         // Add code syntax text pane
         textArea = new TextEditorPane(TextEditorPane.INSERT_MODE);
         textArea.setFont(textArea.getFont().deriveFont(24.0f));
@@ -79,11 +99,13 @@ public class ClientGUI extends GUI {
         cp.add(code);
 
         // Add to the screen all the components
-        JPanel screen = new JPanel(new GridLayout(1, 3));
-        screen.add(chatPanel, BorderLayout.WEST);
-        screen.add(otherUsers, BorderLayout.CENTER);
-        screen.add(cp, BorderLayout.EAST);
-        add(screen, BorderLayout.CENTER);
+        chatScreen = new JPanel(new GridLayout(1, 2));
+        chatScreen.add(chatPanel);
+        chatScreen.add(otherUsers);
+        add(chatScreen, BorderLayout.CENTER);
+
+        codeScreen = new JPanel(new GridLayout(1, 1));
+        codeScreen.add(cp);
 
         // Make a login/register opening frame, and when it successfully authenticates, load frame
         login = new Login(this);
@@ -254,6 +276,16 @@ public class ClientGUI extends GUI {
             } catch (IOException err) {
                 err.printStackTrace();
             }
+        } else if (o == menuChat) {
+            remove(codeScreen);
+            add(chatScreen, BorderLayout.CENTER);
+            validate();
+            repaint(); // Automatically update the screen
+        } else if (o == menuCode) {
+            remove(chatScreen);
+            add(codeScreen, BorderLayout.CENTER);
+            validate();
+            repaint(); // Automatically update the screen
         }
     }
 
