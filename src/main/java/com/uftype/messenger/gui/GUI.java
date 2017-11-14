@@ -26,7 +26,7 @@ public abstract class GUI extends JFrame implements WindowListener, ActionListen
     protected Logger logger = Logger.getLogger(GUI.class.getName());   // Logger to keep track of GUI events
 
     Dispatcher dispatcher;          // Dispatcher (either Client or Server) to handle writing messages
-    JPanel chatPanel;               // Panel to show the chat and message panel
+    JPanel messagePanel, chatPanel; // Panel to show the chat and message panel
     JTextField messages;            // Textfield to input messages
     JTextPane event;                // Event pane to show event messages
     Font monoFont = new Font(Font.DIALOG_INPUT, Font.BOLD, 24);   // Special font
@@ -43,16 +43,17 @@ public abstract class GUI extends JFrame implements WindowListener, ActionListen
         this.dispatcher = dispatcher;
 
         // Add the chat room
-        chatPanel = new JPanel(new GridLayout(2, 1));
+        messagePanel = new JPanel(new GridLayout(3, 1));
+        chatPanel = new JPanel(new GridLayout(1, 1));
         JTextPane chat = new JTextPane();
         chat.setEditable(false);
-        chatPanel.add(new JScrollPane(chat));
+        chatPanel.add(new JScrollPane(chat), BorderLayout.CENTER);
         chatText = chat.getStyledDocument();
         chat.setFont(monoFont);
         addChat("Chat room.");
 
         // Add message text panel
-        JPanel messagePanel = new JPanel(new GridLayout(2, 1));messages = new JTextField("");
+        messages = new JTextField();
         messages.setFont(monoFont);
         JLabel messageLabel = new JLabel("Enter a chat message: ", SwingConstants.CENTER);
         messageLabel.setFont(monoFont);
@@ -60,7 +61,6 @@ public abstract class GUI extends JFrame implements WindowListener, ActionListen
         messagePanel.add(messageLabel);
         messagePanel.add(messages);
         messagePanel.setBackground(blue);
-        chatPanel.add(messagePanel);
 
         // Add the event pane
         event = new JTextPane();
@@ -68,8 +68,9 @@ public abstract class GUI extends JFrame implements WindowListener, ActionListen
         event.setFont(monoFont);
         addEvent("Events log.");
         event.setEditable(false);
+        messagePanel.add(new JScrollPane(event));
+        add(messagePanel, BorderLayout.SOUTH);
         add(chatPanel, BorderLayout.CENTER);
-        add(new JScrollPane(event), BorderLayout.SOUTH);
 
         // Add action listeners for message text field and frame
         messages.addActionListener(this);

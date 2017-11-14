@@ -11,10 +11,7 @@ import org.fife.ui.rtextarea.RTextScrollPane;
 
 import javax.sound.sampled.*;
 import javax.swing.*;
-import javax.swing.border.AbstractBorder;
 import javax.swing.border.Border;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
@@ -110,6 +107,8 @@ public class ClientGUI extends GUI {
         String[] languages = {"Java", "JavaScript", "C", "C++", "C#", "JSON", "HTML", "CSS", "Python"};
         languageList = new JComboBox<>(languages);
         languageList.setFont(monoFont);
+        languageList.setBackground(blue);
+        languageList.setForeground(Color.white);
         languageList.addActionListener(this);
         cp.add(languageList);
         cp.add(sp);
@@ -127,6 +126,7 @@ public class ClientGUI extends GUI {
         chatScreen.add(chatPanel, BorderLayout.CENTER);
         chatScreen.add(otherUsers, BorderLayout.EAST);
 
+        add(messagePanel, BorderLayout.SOUTH);
         // Add both menu and chatscreen to screen
         //JPanel screen = new JPanel(new GridLayout(1, 2));
         add(menu, BorderLayout.WEST);
@@ -145,31 +145,42 @@ public class ClientGUI extends GUI {
         Object o = e.getSource();
 
         if (o == logout) {
-            // Do logout procedures
+            // Create label to prompt when users try to close.
+            JLabel label = new JLabel("Are you sure you want to quit?");
+            label.setFont(monoFont);
 
-            if (Authentication.logout(dispatcher.username)) {
-                // Send logout message to the server
-                // Build and attach message with username
-                SelectionKey key = dispatcher.channel.keyFor(dispatcher.selector);
-                try {
-                    ChatMessage.Message chatMessage = Communication.buildMessage(
-                            "", dispatcher.username, "ALL",
-                            key.channel(), ChatMessage.Message.ChatType.LOGOUT);
-                    key.attach(ByteBuffer.wrap(chatMessage.toByteArray()));
-                    dispatcher.doWrite(key);
-                } catch (IOException err) {
-                    logger.log(Level.WARNING, err.toString());
+            // Open confirm dialog with label
+            int reply = JOptionPane.showConfirmDialog(ClientGUI.this,
+                    label,
+                    "Exit",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE);
+            if (reply == JOptionPane.YES_OPTION) {
+                // Alert server of logout
+                if (Authentication.logout(dispatcher.username)) {
+                    // Send logout message to the server
+                    // Build and attach message with username
+                    SelectionKey key = dispatcher.channel.keyFor(dispatcher.selector);
+                    try {
+                        ChatMessage.Message chatMessage = Communication.buildMessage(
+                                "", dispatcher.username, "ALL",
+                                key.channel(), ChatMessage.Message.ChatType.LOGOUT);
+                        key.attach(ByteBuffer.wrap(chatMessage.toByteArray()));
+                        dispatcher.doWrite(key);
+                    } catch (IOException err) {
+                        logger.log(Level.WARNING, err.toString());
+                    }
+
+                    dispatcher.stop();
+                    dispose();
+                    System.exit(0);
+                } else {
+                    // Something failed, quit application
+                    logger.log(Level.WARNING, "Error logging out of the application.");
+                    dispatcher.stop();
+                    dispose();
+                    System.exit(1);
                 }
-
-                dispatcher.stop();
-                dispose();
-                System.exit(0);
-            } else {
-                // Something failed, quit application
-                logger.log(Level.WARNING, "Error logging out of the application.");
-                dispatcher.stop();
-                dispose();
-                System.exit(1);
             }
         } else if (o == messages && !messages.getText().equals("")) {
             try {
