@@ -11,7 +11,6 @@ import org.fife.ui.rtextarea.RTextScrollPane;
 
 import javax.sound.sampled.*;
 import javax.swing.*;
-import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
@@ -41,10 +40,11 @@ public class ClientGUI extends GUI {
         users = new ConcurrentHashMap<>();
 
         // Label to demonstrate for other users
-        JLabel other = new JLabel("<html>Type a message and click on another user to send them a private message!<html>");
+        //JLabel other = new JLabel("<html>Type a message and click on another user to send them a private message!<html>");
+        JLabel other = new JLabel("<html>Type a message and <br>click on another <br>user to send them <br>a private message!<html>");
         other.setFont(monoFont);
         other.setForeground(Color.white);
-        other.setBorder(BorderFactory.createEmptyBorder(0, 15, 0, 0));
+        other.setBorder(BorderFactory.createEmptyBorder(0, 15, 0, 15));
         otherUsers = new JPanel();
         otherUsers.add(other);
         otherUsers.setBackground(blue);
@@ -118,7 +118,7 @@ public class ClientGUI extends GUI {
         // Add to the screen all the components
         chatScreen = new JPanel(new GridLayout(1, 2));
         chatScreen.add(chatPanel, BorderLayout.CENTER);
-        chatScreen.add(otherUsers, BorderLayout.EAST);
+        add(otherUsers, BorderLayout.EAST);
 
         add(messagePanel, BorderLayout.SOUTH);
         // Add both menu and chatscreen to screen
