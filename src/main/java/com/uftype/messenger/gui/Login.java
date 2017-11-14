@@ -24,18 +24,17 @@ public class Login extends JFrame implements ActionListener, WindowListener {
 
     protected GUI gui;              // Gui screen
 
-    OrangeChangeListener orangeBtn = new OrangeChangeListener();
-    YellowChangeListener yellowBtn = new YellowChangeListener();
-    Color blue = new Color(13, 59, 102);
-    Color orange = new Color(228, 150, 75);
-    Color yellow = new Color(244, 211, 94);
-    Color beige = new Color(250, 240, 202);
+    private Color orange = new Color(228, 150, 75);
+    private Color yellow = new Color(244, 211, 94);
 
     Login(GUI gui) {
         super("UF TYPE Messenger");
 
         loggedInUser = null;
         this.gui = gui;
+
+        Color blue = new Color(13, 59, 102);
+        OrangeChangeListener orangeBtn = new OrangeChangeListener();
 
         // Add login and register button
         loginRegister = new JButton("Register");
@@ -267,18 +266,6 @@ public class Login extends JFrame implements ActionListener, WindowListener {
     @Override
     public void windowDeactivated(WindowEvent e) {
 
-    }
-
-    private class YellowChangeListener implements ChangeListener {
-        JButton rolledBtn;
-        @Override
-        public void stateChanged(ChangeEvent e) {
-            rolledBtn = (JButton)e.getSource();
-            if (rolledBtn.getModel().isRollover())
-                rolledBtn.setBackground(yellow);
-            else
-                rolledBtn.setBackground(beige);
-        }
     }
 
     private class OrangeChangeListener implements ChangeListener {

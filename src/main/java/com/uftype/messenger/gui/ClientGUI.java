@@ -30,7 +30,6 @@ public class ClientGUI extends GUI {
     private JPanel chatScreen, codeScreen;      // Screen to hold the chat and sendCode windows
 
     public Login login;                         // Login screen
-    Border blackline;
     private JButton chat, code, file, logout;
 
     //Create a file chooser
@@ -40,11 +39,6 @@ public class ClientGUI extends GUI {
         super(clientDispatcher, "UF TYPE Messenger Client");
 
         users = new ConcurrentHashMap<>();
-
-        //Keep references to the next few borders,
-        //for use in titles and compound borders.
-
-        blackline = BorderFactory.createLineBorder(Color.black);
 
         // Label to demonstrate for other users
         JLabel other = new JLabel("<html>Type a message and click on another user to send them a private message!<html>");

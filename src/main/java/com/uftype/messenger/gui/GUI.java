@@ -35,7 +35,7 @@ public abstract class GUI extends JFrame implements WindowListener, ActionListen
     YellowChangeListener yellowBtn = new YellowChangeListener();
     Color blue = new Color(13, 59, 102);
     Color orange = new Color(228, 150, 75);
-    Color yellow = new Color(244, 211, 94);
+    private Color yellow = new Color(244, 211, 94);
     Color beige = new Color(250, 240, 202);
 
     GUI(Dispatcher dispatcher, String name) {
