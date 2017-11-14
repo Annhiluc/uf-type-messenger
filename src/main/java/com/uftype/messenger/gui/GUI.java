@@ -1,16 +1,24 @@
 package com.uftype.messenger.gui;
 
+import com.uftype.messenger.common.Communication;
 import com.uftype.messenger.common.Dispatcher;
+import com.uftype.messenger.proto.ChatMessage;
 
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.StyledDocument;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.io.IOException;
 import java.net.URL;
+import java.nio.ByteBuffer;
+import java.nio.channels.SelectionKey;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public abstract class GUI extends JFrame implements WindowListener, ActionListener {
@@ -21,14 +29,21 @@ public abstract class GUI extends JFrame implements WindowListener, ActionListen
     JPanel chatPanel;               // Panel to show the chat and message panel
     JTextField messages;            // Textfield to input messages
     JTextPane event;                // Event pane to show event messages
-    Font monoFont = new Font(Font.MONOSPACED, Font.PLAIN, 24);   // Special font
+    Font monoFont = new Font(Font.DIALOG_INPUT, Font.BOLD, 24);   // Special font
+
+    OrangeChangeListener orangeBtn = new OrangeChangeListener();
+    YellowChangeListener yellowBtn = new YellowChangeListener();
+    Color blue = new Color(13, 59, 102);
+    Color orange = new Color(228, 150, 75);
+    Color yellow = new Color(244, 211, 94);
+    Color beige = new Color(250, 240, 202);
 
     GUI(Dispatcher dispatcher, String name) {
         super(name);
         this.dispatcher = dispatcher;
 
         // Add the chat room
-        chatPanel = new JPanel(new GridLayout(3, 1));
+        chatPanel = new JPanel(new GridLayout(2, 1));
         JTextPane chat = new JTextPane();
         chat.setEditable(false);
         chatPanel.add(new JScrollPane(chat));
@@ -41,18 +56,20 @@ public abstract class GUI extends JFrame implements WindowListener, ActionListen
         messages.setFont(monoFont);
         JLabel messageLabel = new JLabel("Enter a chat message: ", SwingConstants.CENTER);
         messageLabel.setFont(monoFont);
+        messageLabel.setForeground(Color.white);
         messagePanel.add(messageLabel);
         messagePanel.add(messages);
+        messagePanel.setBackground(blue);
         chatPanel.add(messagePanel);
 
         // Add the event pane
         event = new JTextPane();
-        chatPanel.add(new JScrollPane(event));
         eventText = event.getStyledDocument();
         event.setFont(monoFont);
         addEvent("Events log.");
         event.setEditable(false);
         add(chatPanel, BorderLayout.CENTER);
+        add(new JScrollPane(event), BorderLayout.SOUTH);
 
         // Add action listeners for message text field and frame
         messages.addActionListener(this);
@@ -95,6 +112,18 @@ public abstract class GUI extends JFrame implements WindowListener, ActionListen
                 JOptionPane.YES_NO_OPTION,
                 JOptionPane.QUESTION_MESSAGE);
         if (reply == JOptionPane.YES_OPTION) {
+            // Alert server of logout
+            SelectionKey key = dispatcher.channel.keyFor(dispatcher.selector);
+            try {
+                ChatMessage.Message chatMessage = Communication.buildMessage(
+                        "", dispatcher.username, "ALL",
+                        key.channel(), ChatMessage.Message.ChatType.LOGOUT);
+                key.attach(ByteBuffer.wrap(chatMessage.toByteArray()));
+                dispatcher.doWrite(key);
+            } catch (IOException err) {
+                logger.log(Level.WARNING, err.toString());
+            }
+
             // Stop dispatcher
             dispatcher.stop();
             dispose();
@@ -164,5 +193,29 @@ public abstract class GUI extends JFrame implements WindowListener, ActionListen
     @Override
     public void windowDeactivated(WindowEvent e) {
 
+    }
+
+    private class YellowChangeListener implements ChangeListener {
+        JButton rolledBtn;
+        @Override
+        public void stateChanged(ChangeEvent e) {
+            rolledBtn = (JButton)e.getSource();
+            if (rolledBtn.getModel().isRollover())
+                rolledBtn.setBackground(yellow);
+            else
+                rolledBtn.setBackground(beige);
+        }
+    }
+
+    private class OrangeChangeListener implements ChangeListener {
+        JButton rolledBtn;
+        @Override
+        public void stateChanged(ChangeEvent e) {
+            rolledBtn = (JButton)e.getSource();
+            if (rolledBtn.getModel().isRollover())
+                rolledBtn.setBackground(yellow);
+            else
+                rolledBtn.setBackground(orange);
+        }
     }
 }

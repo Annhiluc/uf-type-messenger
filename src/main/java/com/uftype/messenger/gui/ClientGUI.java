@@ -11,25 +11,30 @@ import org.fife.ui.rtextarea.RTextScrollPane;
 
 import javax.sound.sampled.*;
 import javax.swing.*;
+import javax.swing.border.AbstractBorder;
 import javax.swing.border.Border;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
+import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
 public class ClientGUI extends GUI {
-    private JButton logout, file, code;         // Buttons to represent logout, adding a file, and sending code
-    private RSyntaxTextArea textArea;           // Syntax text box for code
+    private JButton sendCode;         // Buttons to represent logout, adding a file, and sending sendCode
+    private RSyntaxTextArea textArea;           // Syntax text box for sendCode
     private ConcurrentHashMap<JButton, String> users; // Maps between other users and their hostnames
     private JPanel otherUsers;                  // Panel showing buttons of other users
     private JComboBox languageList;             // Language list to choose language
-    private JMenuItem menuChat, menuCode;           // Menu options to change screens from code to chat
-    private JPanel chatScreen, codeScreen;      // Screen to hold the chat and code windows
+    private JPanel chatScreen, codeScreen;      // Screen to hold the chat and sendCode windows
 
     public Login login;                         // Login screen
+    Border blackline;
+    private JButton chat, code, file, logout;
 
     //Create a file chooser
     final private JFileChooser fc = new JFileChooser();
@@ -39,44 +44,61 @@ public class ClientGUI extends GUI {
 
         users = new ConcurrentHashMap<>();
 
-        // Add login and logout button
-        JPanel buttonPanel = new JPanel();
-        logout = new JButton("Logout");
-        logout.setFont(monoFont);
-        logout.addActionListener(this);
-        file = new JButton("Add File");
-        file.setFont(monoFont);
-        file.addActionListener(this);
-        logout.setEnabled(true);
-        file.setEnabled(true);
-        buttonPanel.add(logout);
-        buttonPanel.add(file);
-        add(buttonPanel, BorderLayout.NORTH);
+        //Keep references to the next few borders,
+        //for use in titles and compound borders.
+
+        blackline = BorderFactory.createLineBorder(Color.black);
 
         // Label to demonstrate for other users
-        JLabel other = new JLabel("<html>Click on another user to send them a private message!<html>");
+        JLabel other = new JLabel("<html>Type a message and click on another user to send them a private message!<html>");
         other.setFont(monoFont);
+        other.setForeground(Color.white);
+        other.setBorder(BorderFactory.createEmptyBorder(0, 15, 0, 0));
         otherUsers = new JPanel();
         otherUsers.add(other);
+        otherUsers.setBackground(blue);
 
-        // Add the file menu
-        JMenuBar menuBar = new JMenuBar();
-        JMenu menuWindow = new JMenu("Window");
-        menuWindow.setFont(monoFont);
-        menuChat = new JMenuItem("Chat");
-        menuChat.setFont(monoFont);
-        menuCode = new JMenuItem("Code");
-        menuCode.setFont(monoFont);
-        menuWindow.add(menuChat);
-        menuWindow.add(menuCode);
-        menuBar.add(menuWindow);
-        // adds menu bar to the frame
-        setJMenuBar(menuBar);
+        JPanel menu = new JPanel(new GridLayout(5, 1));
 
-        menuChat.addActionListener(this);
-        menuCode.addActionListener(this);
+        URL resource = getClass().getClassLoader().getResource("type-logo.png");
+        if (resource != null) {
+            ImageIcon ii = new ImageIcon(resource);
+            JLabel label = new JLabel(ii);
+            menu.add(label);
+        }
 
-        // Add code syntax text pane
+        chat = new JButton("Chat");
+        chat.setFont(monoFont);
+        chat.setBackground(orange);
+        chat.addChangeListener(orangeBtn);
+        chat.addActionListener(this);
+        menu.add(chat);
+
+        code = new JButton("Code");
+        code.setFont(monoFont);
+        code.setBackground(orange);
+        code.addChangeListener(orangeBtn);
+        code.addActionListener(this);
+        menu.add(code);
+
+        file = new JButton("Add File");
+        file.setFont(monoFont);
+        file.setBackground(orange);
+        file.addChangeListener(orangeBtn);
+        file.addActionListener(this);
+        menu.add(file);
+
+        logout = new JButton("Logout");
+        logout.setFont(monoFont);
+        logout.setBackground(orange);
+        logout.addChangeListener(orangeBtn);
+        logout.addActionListener(this);
+        menu.add(logout);
+
+        //menu.setBorder(BorderFactory.createEmptyBorder(15, 15, 0, 15));
+        menu.setBackground(blue);
+
+        // Add sendCode syntax text pane
         textArea = new TextEditorPane(TextEditorPane.INSERT_MODE);
         textArea.setFont(textArea.getFont().deriveFont(24.0f));
         JPanel cp = new JPanel(new GridLayout(3, 1));
@@ -84,7 +106,7 @@ public class ClientGUI extends GUI {
         textArea.setCodeFoldingEnabled(true);
         RTextScrollPane sp = new RTextScrollPane(textArea);
 
-        // Add languages for code syntax
+        // Add languages for sendCode syntax
         String[] languages = {"Java", "JavaScript", "C", "C++", "C#", "JSON", "HTML", "CSS", "Python"};
         languageList = new JComboBox<>(languages);
         languageList.setFont(monoFont);
@@ -92,19 +114,26 @@ public class ClientGUI extends GUI {
         cp.add(languageList);
         cp.add(sp);
 
-        // Button to send code to another user
-        code = new JButton("Send Code");
-        code.setFont(monoFont);
-        code.addActionListener(this);
-        cp.add(code);
+        // Button to send sendCode to another user
+        sendCode = new JButton("Send Code");
+        sendCode.setFont(monoFont);
+        sendCode.setBackground(beige);
+        sendCode.addChangeListener(yellowBtn);
+        sendCode.addActionListener(this);
+        cp.add(sendCode);
 
         // Add to the screen all the components
         chatScreen = new JPanel(new GridLayout(1, 2));
-        chatScreen.add(chatPanel);
-        chatScreen.add(otherUsers);
-        add(chatScreen, BorderLayout.CENTER);
+        chatScreen.add(chatPanel, BorderLayout.CENTER);
+        chatScreen.add(otherUsers, BorderLayout.EAST);
 
-        codeScreen = new JPanel(new GridLayout(1, 1));
+        // Add both menu and chatscreen to screen
+        //JPanel screen = new JPanel(new GridLayout(1, 2));
+        add(menu, BorderLayout.WEST);
+        add(chatScreen, BorderLayout.CENTER);
+        pack();
+
+        codeScreen = new JPanel(new GridLayout(1, 2));
         codeScreen.add(cp);
 
         // Make a login/register opening frame, and when it successfully authenticates, load frame
@@ -117,8 +146,6 @@ public class ClientGUI extends GUI {
 
         if (o == logout) {
             // Do logout procedures
-            logout.setEnabled(false);
-            file.setEnabled(false);
 
             if (Authentication.logout(dispatcher.username)) {
                 // Send logout message to the server
@@ -159,7 +186,7 @@ public class ClientGUI extends GUI {
             } catch (IOException err) {
                 logger.log(Level.WARNING, err.toString());
             }
-        } else if (o == code && !textArea.getText().equals("")) {
+        } else if (o == sendCode && !textArea.getText().equals("")) {
             try {
                 // Get the associated key to attach message
                 SelectionKey key = dispatcher.channel.keyFor(dispatcher.selector);
@@ -170,7 +197,7 @@ public class ClientGUI extends GUI {
                 key.attach(ByteBuffer.wrap(chatMessage.toByteArray()));
                 dispatcher.doWrite(key);
 
-                addEvent(dispatcher.username + ": sent code snippet");
+                addEvent(dispatcher.username + ": sent sendCode snippet");
                 textArea.setText(""); // Clear message
             } catch (IOException err) {
                 logger.log(Level.WARNING, err.toString());
@@ -221,7 +248,7 @@ public class ClientGUI extends GUI {
                 logger.log(Level.WARNING, err.toString());
             }
         } else if (o == languageList) {
-            // Change RSyntaxPane code for syntax highlighting.
+            // Change RSyntaxPane sendCode for syntax highlighting.
             JComboBox cb = (JComboBox) o;
             String language = cb.getSelectedItem() == null ? "Java" : (String) cb.getSelectedItem();
             switch (language) {
@@ -276,12 +303,12 @@ public class ClientGUI extends GUI {
             } catch (IOException err) {
                 err.printStackTrace();
             }
-        } else if (o == menuChat) {
+        } else if (o == chat) {
             remove(codeScreen);
             add(chatScreen, BorderLayout.CENTER);
             validate();
             repaint(); // Automatically update the screen
-        } else if (o == menuCode) {
+        } else if (o == code) {
             remove(chatScreen);
             add(codeScreen, BorderLayout.CENTER);
             validate();
@@ -308,6 +335,8 @@ public class ClientGUI extends GUI {
             if (!users.containsValue(host)) {
                 // Need to populate with currently logged in users
                 JButton user = new JButton(dispatcher.connectedHosts.get(host));
+                user.addChangeListener(yellowBtn);
+                user.setBackground(beige);
                 user.setFont(monoFont);
                 user.addActionListener(this); // To create a chat window with that one user
                 users.put(user, host);

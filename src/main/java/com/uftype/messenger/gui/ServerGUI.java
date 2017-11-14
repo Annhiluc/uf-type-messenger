@@ -23,6 +23,8 @@ public class ServerGUI extends GUI {
         JPanel startPanel = new JPanel();
         start = new JButton("Stop");
         start.setFont(monoFont);
+        start.setBackground(orange);
+        start.addChangeListener(orangeBtn);
         start.addActionListener(this); // Will start the server
         startPanel.add(start);
         add(start, BorderLayout.NORTH);

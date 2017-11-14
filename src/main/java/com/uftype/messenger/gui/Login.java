@@ -4,6 +4,8 @@ import com.uftype.messenger.auth.Authentication;
 import com.uftype.messenger.common.UserContext;
 
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -16,11 +18,18 @@ public class Login extends JFrame implements ActionListener, WindowListener {
     private JPasswordField passwordLogin, passwordRegister;              // Password fields for login and registration
     private JPanel loginPanel, registerPanel;                            // Panel for login and for registration
     private JButton submit, loginRegister;                               // Button to submit the login information
-    private Font monoFont = new Font(Font.MONOSPACED, Font.PLAIN, 24);              // Special font
+    private Font monoFont = new Font(Font.DIALOG_INPUT, Font.BOLD, 24);              // Special font
 
     UserContext loggedInUser;       // Logged in user context
 
     protected GUI gui;              // Gui screen
+
+    OrangeChangeListener orangeBtn = new OrangeChangeListener();
+    YellowChangeListener yellowBtn = new YellowChangeListener();
+    Color blue = new Color(13, 59, 102);
+    Color orange = new Color(228, 150, 75);
+    Color yellow = new Color(244, 211, 94);
+    Color beige = new Color(250, 240, 202);
 
     Login(GUI gui) {
         super("UF TYPE Messenger");
@@ -33,6 +42,8 @@ public class Login extends JFrame implements ActionListener, WindowListener {
         loginRegister.addActionListener(this);
         loginRegister.setEnabled(true);
         loginRegister.setFont(monoFont);
+        loginRegister.setBackground(orange);
+        loginRegister.addChangeListener(orangeBtn);
 
         // Add logo and title button
         JPanel title = new JPanel(new GridLayout(3, 1));
@@ -46,18 +57,22 @@ public class Login extends JFrame implements ActionListener, WindowListener {
         JLabel welcome = new JLabel("Welcome to the UF TYPE Messenger!");
         welcome.setHorizontalAlignment(SwingConstants.CENTER);
         welcome.setFont(monoFont);
+        welcome.setForeground(Color.white);
         title.add(welcome);
         title.add(loginRegister);
+        title.setBackground(blue);
         add(title, BorderLayout.NORTH);
 
         // Login panel with username and password
         loginPanel = new JPanel(new GridLayout(2, 1));
         JLabel userLabel = new JLabel("Username:");
         userLabel.setFont(monoFont);
+        userLabel.setForeground(Color.white);
         usernameLogin = new JTextField(1);
         usernameLogin.setFont(monoFont);
         JLabel passLabel = new JLabel("Password:");
         passLabel.setFont(monoFont);
+        passLabel.setForeground(Color.white);
         passwordLogin = new JPasswordField(1);
         passwordLogin.setFont(monoFont);
 
@@ -65,29 +80,36 @@ public class Login extends JFrame implements ActionListener, WindowListener {
         loginPanel.add(usernameLogin);
         loginPanel.add(passLabel);
         loginPanel.add(passwordLogin);
+        loginPanel.setBackground(blue);
+        loginPanel.setForeground(Color.white);
         add(loginPanel, BorderLayout.CENTER);
 
         // Register panel with name, username, password, email
         registerPanel = new JPanel(new GridLayout(5, 1));
         JLabel firstLabel = new JLabel("First name:");
         firstLabel.setFont(monoFont);
+        firstLabel.setForeground(Color.white);
         firstName = new JTextField(1);
         firstName.setFont(monoFont);
         JLabel lastLabel = new JLabel("Last name:");
         lastLabel.setFont(monoFont);
+        lastLabel.setForeground(Color.white);
         lastName = new JTextField(1);
         lastName.setFont(monoFont);
         userLabel = new JLabel("Username:");
         userLabel.setFont(monoFont);
+        userLabel.setForeground(Color.white);
         usernameRegister = new JTextField(1);
         usernameRegister.setFont(monoFont);
         passLabel = new JLabel("Password:");
         passLabel.setFont(monoFont);
+        passLabel.setForeground(Color.white);
         passwordRegister = new JPasswordField(1);
         passwordRegister.setFont(monoFont);
         // Consider adding another password field here to verify password
         JLabel emailLabel = new JLabel("Email:");
         emailLabel.setFont(monoFont);
+        emailLabel.setForeground(Color.white);
         email = new JTextField(1);
         email.setFont(monoFont);
         // Consider adding another email field here to verify email
@@ -102,6 +124,7 @@ public class Login extends JFrame implements ActionListener, WindowListener {
         registerPanel.add(passwordRegister);
         registerPanel.add(emailLabel);
         registerPanel.add(email);
+        registerPanel.setBackground(blue);
 
         // Will add this panel to frame when register button pressed
 
@@ -109,6 +132,8 @@ public class Login extends JFrame implements ActionListener, WindowListener {
         submit = new JButton("Submit");
         submit.addActionListener(this);
         submit.setFont(monoFont);
+        submit.setBackground(orange);
+        submit.addChangeListener(orangeBtn);
         submitPanel.add(submit);
         add(submitPanel, BorderLayout.SOUTH);
 
@@ -242,5 +267,29 @@ public class Login extends JFrame implements ActionListener, WindowListener {
     @Override
     public void windowDeactivated(WindowEvent e) {
 
+    }
+
+    private class YellowChangeListener implements ChangeListener {
+        JButton rolledBtn;
+        @Override
+        public void stateChanged(ChangeEvent e) {
+            rolledBtn = (JButton)e.getSource();
+            if (rolledBtn.getModel().isRollover())
+                rolledBtn.setBackground(yellow);
+            else
+                rolledBtn.setBackground(beige);
+        }
+    }
+
+    private class OrangeChangeListener implements ChangeListener {
+        JButton rolledBtn;
+        @Override
+        public void stateChanged(ChangeEvent e) {
+            rolledBtn = (JButton)e.getSource();
+            if (rolledBtn.getModel().isRollover())
+                rolledBtn.setBackground(yellow);
+            else
+                rolledBtn.setBackground(orange);
+        }
     }
 }
