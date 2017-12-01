@@ -98,6 +98,7 @@ public class SqlDatabase extends Database {
             stmt.executeQuery("commit");
         } catch (SQLException e) {
             LOGGER.log(Level.WARNING, "Unable to register user: " + e);
+            return false;
         }
 
         return true;

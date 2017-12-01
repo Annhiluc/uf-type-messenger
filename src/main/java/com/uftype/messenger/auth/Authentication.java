@@ -35,6 +35,10 @@ public class Authentication {
      * Returns true if register is successful using provided credentials, false otherwise.
      */
     public static boolean register(String firstname, String lastname, String username, String email, String password) {
+        if (firstname.equals("") || lastname.equals("") || username.equals("") || email.equals("") || password.equals("")) {
+            return false;
+        }
+
         if (database.connect()) {
             String salt = generateSalt();
             String securePassword = hashMD5(password, salt); // This secure password wil be stored in the database
@@ -82,7 +86,7 @@ public class Authentication {
     private static String generateSalt() {
         byte[] salt = new byte[16];
         RANDOM.nextBytes(salt);
-        return new String(salt);
+        return salt.toString();
     }
 
     /**
